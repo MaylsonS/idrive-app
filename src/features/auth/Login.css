@@ -1,0 +1,117 @@
+/* src/features/auth/Login.css */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.background-tela {
+  background-color: #E26831;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-login {
+  background-color: white;
+  width: 100%;
+  max-width: 450px;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.logo-texto {
+  font-size: 24px;
+  font-weight: bold;
+  color: #111;
+  margin-bottom: 20px;
+}
+
+.triangulo {
+  color: #E26831;
+}
+
+.titulo {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.subtitulo {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.btn-google {
+  width: 100%;
+  padding: 12px;
+  background-color: transparent;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 25px;
+}
+
+.divisor {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.divisor::before,
+.divisor::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #eee;
+}
+
+.divisor span {
+  padding: 0 10px;
+  color: #aaa;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.btn-entrar {
+  width: 100%;
+  padding: 14px;
+  background-color: #E26831;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  box-shadow: 0px 4px 10px rgba(226, 104, 49, 0.3);
+}
+
+.rodape {
+  margin-top: 30px;
+  font-size: 14px;
+  color: #666;
+}
+
+.rodape a {
+  color: #E26831;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.copyright {
+  margin-top: 20px;
+  font-size: 10px;
+  color: #bbb;
+  letter-spacing: 1px;
+}

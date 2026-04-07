@@ -1,0 +1,40 @@
+
+.grupo-input {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.grupo-input label {
+  display: block;
+  font-size: 11px;
+  font-weight: bold;
+  color: #666;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.label-senha {
+  display: flex;
+  justify-content: space-between;
+}
+
+.link-esqueceu {
+  font-size: 10px;
+  color: #E26831;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.grupo-input input {
+  width: 100%;
+  padding: 14px;
+  background-color: #F4F7FB;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+.grupo-input input:focus {
+  outline: 2px solid #E26831;
+}
