@@ -38,3 +38,19 @@
 .grupo-input input:focus {
   outline: 2px solid #E26831;
 }
+.input-com-icone {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.icone-container {
+  position: absolute;
+  left: 14px; /* Posiciona o ícone do lado esquerdo */
+  color: #999;
+  display: flex;
+}
+
+.grupo-input input.com-icone {
+  padding-left: 45px;
+}

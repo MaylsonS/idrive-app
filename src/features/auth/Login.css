@@ -24,12 +24,24 @@
   box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
-
+/*
 .logo-texto {
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 30px;
+  font-weight: 700;
   color: #111;
   margin-bottom: 20px;
+} */
+
+
+.logo-texto {
+  font-size: 30px;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 20px;
+  /* O Flexbox aqui garante que o ícone e o texto fiquem perfeitamente alinhados na mesma linha */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .triangulo {

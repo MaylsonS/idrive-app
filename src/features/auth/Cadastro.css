@@ -1,0 +1,91 @@
+/* src/features/auth/Cadastro.css */
+
+.card-cadastro {
+  background-color: white;
+  width: 100%;
+  max-width: 500px; /* Um pouco mais largo que o login */
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.icone-carro {
+  background-color: #A83B0E;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 8px;
+  margin-right: 8px;
+}
+
+/* O fundo cinza clarinho da pílula inteira */
+.seletor-perfil {
+  display: flex;
+  background-color: #F4F7FB; /* Mesma cor de fundo dos inputs */
+  border-radius: 10px;
+  padding: 6px; /* Espaço para o botão respirar dentro da pílula */
+  margin-bottom: 30px;
+}
+
+/* O botão inativo */
+.aba {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: transparent;
+  color: #888;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* O botão ativo com cor escura e sombrinha */
+.aba.ativa {
+  background-color: #A83B0E; /* O laranja escuro do Figma */
+  color: white;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+
+.termos-container {
+  display: flex;
+  align-items: flex-start;
+  text-align: left;
+  gap: 10px;
+  margin: 20px 0;
+  font-size: 11px;
+  color: #666;
+}
+
+.termos-container input {
+  margin-top: 2px;
+}
+
+.link-destaque {
+  color: #E26831; /* O laranja principal */
+  text-decoration: none;
+  font-weight: 700;
+}
+.link-destaque:hover {
+  text-decoration: underline;
+}
+
+.logo-texto {
+  font-size: 30px;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.icone-carro {
+  background-color: #A83B0E;
+  padding: 10px;
+  border-radius: 10px;
+  margin-right: 12px;
+}
