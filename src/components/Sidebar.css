@@ -1,0 +1,125 @@
+/* src/components/Sidebar.css */
+.sidebar-container {
+  width: 260px;
+  background-color: white;
+  height: 100vh; /* Ocupa 100% da altura da tela */
+  border-right: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  /* Isso faz a sidebar ficar fixa no lado esquerdo da tela */
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1; /* Faz o menu empurrar o rodapé lá para baixo */
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #666;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.nav-item:hover {
+  background-color: #F4F7FB;
+  color: #E26831;
+}
+
+/* O estilo do item que está selecionado (Laranja com fundo laranjinha) */
+.nav-item.ativo {
+  background-color: #FFF0E6;
+  color: #E26831;
+}
+
+.sidebar-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.usuario-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  background-color: #E26831;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.usuario-textos {
+  display: flex;
+  flex-direction: column;
+}
+
+.usuario-textos strong {
+  font-size: 14px;
+  color: #333;
+}
+
+.usuario-textos span {
+  font-size: 12px;
+  color: #888;
+}
+
+.btn-sair {
+  background: transparent;
+  border: none;
+  color: #999;
+  cursor: pointer;
+}
+
+.btn-sair:hover {
+  color: #E26831;
+}
+
+/* O contêiner da Logo */
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+/* O texto IDrive idêntico ao Login */
+.sidebar-logo .logo-texto {
+  font-size: 30px;
+  font-weight: 700; /* ExtraBold da Manrope */
+  color: #111;
+  margin: auto;
+}
+
+/* O triângulo Laranja idêntico ao Login */
+.sidebar-logo .triangulo {
+  color: #E26831;
+  font-size: 26px;
+  margin-right: 8px; /* Dá o respiro entre o triângulo e a palavra */
+}
+
+.icon-logo{
+    padding: 10px;
+   }

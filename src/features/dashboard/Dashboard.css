@@ -1,0 +1,25 @@
+/* src/features/dashboard/Dashboard.css */
+.layout-app {
+  display: flex;
+  min-height: 100vh;
+  background-color: #F4F7FB; /* Fundo cinza claro padrão do sistema */
+}
+
+.conteudo-principal {
+  /* O pulo do gato: A sidebar tem 260px e é fixa.
+     Então damos uma margem de 260px na esquerda do conteúdo para ele não ficar escondido atrás dela! */
+  margin-left: 260px;
+  padding: 40px;
+  flex: 1; /* Ocupa todo o resto do espaço disponível */
+}
+
+.header-dashboard h1 {
+  font-size: 28px;
+  color: #111;
+  margin-bottom: 4px;
+}
+
+.header-dashboard p {
+  color: #666;
+  font-size: 16px;
+}
