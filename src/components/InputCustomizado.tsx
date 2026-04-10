@@ -9,6 +9,8 @@ interface InputProps {
   onChange: (texto: string) => void;
   temLinkEsqueceuSenha?: boolean;
   icone?: ReactNode;
+  onBlur?: () => void;
+  temErro?: boolean;
 }
 
 export function InputCustomizado({
@@ -18,7 +20,9 @@ export function InputCustomizado({
   value,
   onChange,
   temLinkEsqueceuSenha,
-  icone}: InputProps) {
+  icone,
+  onBlur,
+  temErro}: InputProps) {
 
   return (
     <div className="grupo-input">
@@ -36,7 +40,8 @@ export function InputCustomizado({
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={icone ? 'com-icone' : ''}
+          onBlur={onBlur}
+          className={`${icone ? 'com-icone' : ''} ${temErro ? 'input-erro' : ''}`}
           required
         />
       </div>

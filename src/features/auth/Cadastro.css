@@ -89,3 +89,14 @@
   border-radius: 10px;
   margin-right: 12px;
 }
+
+.mensagem-erro {
+  color: var(--error);
+  font-size: 0.8rem;
+  margin-top: -25px;
+}
+
+.borda-erro input {
+  border: 2px solid var(--error) !important;
+  background-color: #fff5f5;
+}
