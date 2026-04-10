@@ -1,11 +1,16 @@
 import { useState } from 'react';
 import './Cadastro.css';
 import { InputCustomizado } from '../../components/InputCustomizado';
-
 import iconCar from '../../assets/icons/icon-car.svg';
-
-
 import { User, CreditCard, Mail, Phone, Lock } from 'lucide-react';
+
+import { mascaraCPF, mascaraTelefone, mascaraCNH, extrairApenasNumeros } from '../../utils/masks';
+
+import { alunoService } from '../../services/alunoService';
+import { instrutorService } from '../../services/instrutorService';
+
+import type { AlunoRegistroDTO } from '../../services/alunoService';
+import type { InstrutorRegistroDTO } from '../../services/instrutorService';
 
 export function Cadastro() {
   const [perfilSelecionado, setPerfilSelecionado] = useState<'ALUNO' | 'INSTRUTOR'>('ALUNO');
@@ -17,17 +22,39 @@ export function Cadastro() {
   const [senha, setSenha] = useState('');
   const [cnh, setCnh] = useState('');
 
-  const handleCadastrar = (e: React.FormEvent) => {
+  const handleCadastrar = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const dadosParaEnviar = {
-      nome, cpf, email, telefone, senha,
-      tipoPerfil: perfilSelecionado,
-      ...(perfilSelecionado === 'INSTRUTOR' && { cnh })
-    };
+    try {
+        const cpfLimpo = extrairApenasNumeros(cpf);
+        const telefoneLimpo = extrairApenasNumeros(telefone);
 
-    console.log("Dados prontos para a API:", dadosParaEnviar);
-    // No futuro: if(perfilSelecionado === 'ALUNO') alunoService.cadastrar(dadosParaEnviar) ...
+      if (perfilSelecionado === 'ALUNO') {
+        const dadosAluno: AlunoRegistroDTO = {
+          nome, cpf:cpfLimpo, email, telefone: telefoneLimpo, senha, tipoPerfil: 'ALUNO'
+        };
+        console.log("Enviando ALUNO para a API...", dadosAluno);
+
+        const resposta = await alunoService.registrar(dadosAluno);
+        console.log("Sucesso!", resposta);
+        alert("Aluno cadastrado com sucesso!");
+
+      } else if (perfilSelecionado === 'INSTRUTOR') {
+        const dadosInstrutor: InstrutorRegistroDTO = {
+          nome, cpf:cpfLimpo, email, telefone: telefoneLimpo, senha, tipoPerfil: 'INSTRUTOR', cnh
+        };
+        console.log("Enviando INSTRUTOR para a API...", dadosInstrutor);
+
+        const resposta = await instrutorService.registrar(dadosInstrutor);
+        console.log("Sucesso!", resposta);
+        alert("Instrutor cadastrado com sucesso!");
+      }
+      setNome(''); setCpf(''); setEmail(''); setTelefone(''); setSenha(''); setCnh('');
+
+    } catch (error) {
+      console.error("Erro ao cadastrar:", error);
+      alert("Erro ao realizar o cadastro. Verifique o console.");
+    }
   };
 
   return (
@@ -70,14 +97,16 @@ export function Cadastro() {
 
           <InputCustomizado
             label="CPF" type="text" placeholder="000.000.000-00"
-            value={cpf} onChange={setCpf}
+            value={cpf}
+            onChange={(texto) => setCpf(mascaraCPF(texto))}
             icone={<CreditCard size={18} />}
           />
 
           {perfilSelecionado === 'INSTRUTOR' && (
               <InputCustomizado
-                label="CNH" type="text" placeholder="Número da CNH"
-                value={cnh} onChange={setCnh}
+                label="CNH" type="text" placeholder="Apenas número da CNH"
+                value={cnh}
+                onChange={(texto) => setCnh(mascaraCNH(texto))}
                 icone={<CreditCard size={18} />}
               />
           )}
@@ -90,7 +119,8 @@ export function Cadastro() {
 
           <InputCustomizado
             label="TELEFONE" type="text" placeholder="(83) 99999-9999"
-            value={telefone} onChange={setTelefone}
+            value={telefone}
+            onChange={(texto) => setTelefone(mascaraTelefone(texto))}
             icone={<Phone size={18} />}
           />
 
