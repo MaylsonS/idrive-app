@@ -7,17 +7,25 @@ export function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
-  const handleLogin = async (e: React.FormEvent) => {
+const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      console.log("Enviando dados para a API...");
-      const resposta = await authService.login({ email, senha });
-      console.log("Sucesso! O Spring Boot respondeu:", resposta);
+      console.log("Iniciando requisição para o Spring Boot...");
+      console.log(" Dados enviados:", { email, senha });
 
-      // JWT AQUI
+      const resposta = await authService.login({ email, senha });
+
+      console.log("✅ [LOGIN] Sucesso! O Spring Boot devolveu:", resposta);
+
+      localStorage.setItem('idrive_token', resposta.token);
+      console.log("🔐 [LOGIN] Token JWT guardado no localStorage com sucesso!");
+
+      alert("Login realizado com sucesso! (Olhe o console)");
+
     } catch (error) {
-      console.error("Erro ao fazer login. Verifique se o Spring Boot está rodando:", error);
+      console.error("❌ [LOGIN] Erro ao fazer login. O Spring Boot recusou:", error);
+      alert("Erro ao fazer login. Verifique se o e-mail e senha estão corretos.");
     }
   };
 

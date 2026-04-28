@@ -29,17 +29,51 @@ export function Cadastro() {
 
 
   const handleCadastrar = async (e: React.FormEvent) => {
-    e.preventDefault();
+      e.preventDefault();
 
-    const dadosParaEnviar = {
-      nome, cpf, email, telefone, senha,
-      tipoPerfil: perfilSelecionado,
-      ...(perfilSelecionado === 'INSTRUTOR' && { cnh })
+      try {
+        console.log(`[CADASTRO] Iniciando disparo para a API. Perfil: ${perfilSelecionado}`);
+
+        const cpfLimpo = extrairApenasNumeros(cpf);
+        const telefoneLimpo = extrairApenasNumeros(telefone);
+
+        if (perfilSelecionado === 'ALUNO') {
+          const dadosAluno: AlunoRegistroDTO = {
+            nome,
+            cpf: cpfLimpo,
+            email,
+            telefone: telefoneLimpo,
+            senha,
+            tipoPerfil: 'ALUNO'
+          };
+          console.log("[CADASTRO] Payload do Aluno montado:", dadosAluno);
+
+          const resposta = await alunoService.registrar(dadosAluno);
+          console.log("[CADASTRO] Sucesso! Resposta do servidor:", resposta);
+          alert("Aluno cadastrado com sucesso!");
+
+        } else if (perfilSelecionado === 'INSTRUTOR') {
+          const dadosInstrutor: InstrutorRegistroDTO = {
+            nome,
+            cpf: cpfLimpo,
+            email,
+            telefone: telefoneLimpo,
+            senha,
+            tipoPerfil: 'INSTRUTOR',
+            cnh: extrairApenasNumeros(cnh)
+          };
+          console.log("[CADASTRO] Payload do Instrutor montado:", dadosInstrutor);
+
+          const resposta = await instrutorService.registrar(dadosInstrutor);
+          console.log("[CADASTRO] Sucesso! Resposta do servidor:", resposta);
+          alert("Instrutor cadastrado com sucesso!");
+        }
+
+      } catch (error) {
+        console.error(" [CADASTRO] Erro crítico na comunicação com o backend:", error);
+        alert("Erro ao realizar o cadastro. Tente novamente.");
+      }
     };
-
-    console.log("Dados prontos para a API:", dadosParaEnviar);
-    // No futuro: if(perfilSelecionado === 'ALUNO') alunoService.cadastrar(dadosParaEnviar) ...
-  };
 
 
   const validarCampo = (nomeCampo: string, valor: string) => {
@@ -76,11 +110,11 @@ export function Cadastro() {
     setErros(prev => ({ ...prev, [nomeCampo]: mensagem }));
   };
 
-  const camposPreenchidos = 
-    nome.trim() !== '' && 
+  const camposPreenchidos =
+    nome.trim() !== '' &&
     cpf.length >= 14 &&
-    email.trim() !== '' && 
-    telefone.length >= 14 && 
+    email.trim() !== '' &&
+    telefone.length >= 14 &&
     senha.length >= 6;
 
   const cnhValida = perfilSelecionado === 'ALUNO' || (perfilSelecionado === 'INSTRUTOR' && cnh.trim() !== '');
@@ -99,8 +133,8 @@ export function Cadastro() {
       numeros = numeros.slice(0, 11);
     }
     const cpfFormatado = numeros
-      .replace(/(\d{3})(\d)/, '$1.$2')       
-      .replace(/(\d{3})(\d)/, '$1.$2')       
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
       .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 
     setCpf(cpfFormatado);
