@@ -1,11 +1,17 @@
-import { Login } from './features/auth/Login';
-import { Cadastro } from './features/auth/Cadastro'
-import {Dashboard} from './features/dashboard/Dashboard'
-import {GerenciarAulas} from './features/aulas/GerenciarAulas'
-import './App.css';
+import { StrictMode, Suspense } from 'react';
+import { RouterProvider } from 'react-router-dom';
+import { AuthContextProvider } from './contexts/AuthContext';
+import { router } from './router';
+import './index.css';
 
 function App() {
-  return ( <Login/> );
+  return (
+    <AuthContextProvider>
+      <Suspense fallback={<div>Carregando o IDrive...</div>}>
+        <RouterProvider router={router} />
+      </Suspense>
+    </AuthContextProvider>
+  );
 }
 
 export default App;

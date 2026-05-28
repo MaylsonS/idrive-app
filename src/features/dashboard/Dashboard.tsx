@@ -1,7 +1,7 @@
 import './Dashboard.css';
 import { Sidebar } from '../../components/Sidebar';
 
-export function Dashboard() {
+export default function Dashboard() {
   return (
     <div className="layout-app">
       <Sidebar itemAtivo="INICIO" />

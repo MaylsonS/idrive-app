@@ -1,9 +1,9 @@
 import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import './Cadastro.css';
 import { InputCustomizado } from '../../components/InputCustomizado';
 
 import iconCar from '../../assets/icons/Icon-car.svg';
-
 
 import { User, CreditCard, Mail, Phone, Lock } from 'lucide-react';
 
@@ -15,8 +15,9 @@ import { instrutorService } from '../../services/instrutorService';
 import type { AlunoRegistroDTO } from '../../services/alunoService';
 import type { InstrutorRegistroDTO } from '../../services/instrutorService';
 
-export function Cadastro() {
+export default function Cadastro() {
   const [perfilSelecionado, setPerfilSelecionado] = useState<'ALUNO' | 'INSTRUTOR'>('ALUNO');
+  const navigate = useNavigate();
 
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
@@ -27,54 +28,48 @@ export function Cadastro() {
   const [erros, setErros] = useState<{ [key: string]: string }>({});
   const [termosAceitos, setTermosAceitos] = useState(false);
 
-
   const handleCadastrar = async (e: React.FormEvent) => {
-      e.preventDefault();
+    e.preventDefault();
 
-      try {
-        console.log(`[CADASTRO] Iniciando disparo para a API. Perfil: ${perfilSelecionado}`);
+    try {
+      const cpfLimpo = extrairApenasNumeros(cpf);
+      const telefoneLimpo = extrairApenasNumeros(telefone);
 
-        const cpfLimpo = extrairApenasNumeros(cpf);
-        const telefoneLimpo = extrairApenasNumeros(telefone);
+      if (perfilSelecionado === 'ALUNO') {
+        const dadosAluno: AlunoRegistroDTO = {
+          nome,
+          cpf: cpfLimpo,
+          email,
+          telefone: telefoneLimpo,
+          senha,
+          tipoPerfil: 'ALUNO'
+        };
 
-        if (perfilSelecionado === 'ALUNO') {
-          const dadosAluno: AlunoRegistroDTO = {
-            nome,
-            cpf: cpfLimpo,
-            email,
-            telefone: telefoneLimpo,
-            senha,
-            tipoPerfil: 'ALUNO'
-          };
-          console.log("[CADASTRO] Payload do Aluno montado:", dadosAluno);
+        await alunoService.registrar(dadosAluno);
+        alert("Aluno cadastrado com sucesso!");
+        navigate('/login');
 
-          const resposta = await alunoService.registrar(dadosAluno);
-          console.log("[CADASTRO] Sucesso! Resposta do servidor:", resposta);
-          alert("Aluno cadastrado com sucesso!");
+      } else if (perfilSelecionado === 'INSTRUTOR') {
+        const dadosInstrutor: InstrutorRegistroDTO = {
+          nome,
+          cpf: cpfLimpo,
+          email,
+          telefone: telefoneLimpo,
+          senha,
+          tipoPerfil: 'INSTRUTOR',
+          cnh: extrairApenasNumeros(cnh)
+        };
 
-        } else if (perfilSelecionado === 'INSTRUTOR') {
-          const dadosInstrutor: InstrutorRegistroDTO = {
-            nome,
-            cpf: cpfLimpo,
-            email,
-            telefone: telefoneLimpo,
-            senha,
-            tipoPerfil: 'INSTRUTOR',
-            cnh: extrairApenasNumeros(cnh)
-          };
-          console.log("[CADASTRO] Payload do Instrutor montado:", dadosInstrutor);
-
-          const resposta = await instrutorService.registrar(dadosInstrutor);
-          console.log("[CADASTRO] Sucesso! Resposta do servidor:", resposta);
-          alert("Instrutor cadastrado com sucesso!");
-        }
-
-      } catch (error) {
-        console.error(" [CADASTRO] Erro crítico na comunicação com o backend:", error);
-        alert("Erro ao realizar o cadastro. Tente novamente.");
+        await instrutorService.registrar(dadosInstrutor);
+        alert("Instrutor cadastrado com sucesso!");
+        navigate('/login');
       }
-    };
 
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao realizar o cadastro. Tente novamente.");
+    }
+  };
 
   const validarCampo = (nomeCampo: string, valor: string) => {
     let mensagem = '';
@@ -123,10 +118,6 @@ export function Cadastro() {
 
   const formularioValido = camposPreenchidos && cnhValida && !temErrosNoFormulario && termosAceitos;
 
-
-
-
-
   function handleCpfChange(valorBruto: string): void {
     let numeros = valorBruto.replace(/\D/g, '');
     if (numeros.length > 11) {
@@ -157,12 +148,12 @@ export function Cadastro() {
     <div className="background-tela">
       <div className="card-cadastro">
 
-     <div className="logo-container">
-       <h1 className="logo-texto">
-         <img src={iconCar} alt="Logo IDrive" className="icone-carro" />
-         IDrive
-       </h1>
-     </div>
+        <div className="logo-container">
+          <h1 className="logo-texto">
+            <img src={iconCar} alt="Logo IDrive" className="icone-carro" />
+            IDrive
+          </h1>
+        </div>
         <h2 className="titulo">Crie sua conta</h2>
         <p className="subtitulo">Preencha os dados abaixo para começar sua jornada</p>
 
@@ -192,7 +183,7 @@ export function Cadastro() {
             temErro={!!erros.nome}
             icone={<User size={18} />}
           />
-            {erros.nome && <span className="mensagem-erro">{erros.nome}</span>}
+          {erros.nome && <span className="mensagem-erro">{erros.nome}</span>}
 
           <InputCustomizado
             label="CPF" type="text" placeholder="000.000.000-00"
@@ -201,28 +192,28 @@ export function Cadastro() {
             temErro={!!erros.cpf}
             icone={<CreditCard size={18} />}
           />
-            {erros.cpf && <span className="mensagem-erro">{erros.cpf}</span>}
+          {erros.cpf && <span className="mensagem-erro">{erros.cpf}</span>}
 
 
           {perfilSelecionado === 'INSTRUTOR' && (
-              <InputCustomizado
-                label="CNH" type="text" placeholder="Apenas número da CNH"
-                value={cnh}
-                onBlur={() => validarCampo('cnh', cnh)}
-                temErro={!!erros.cnh}
-                onChange={(texto) => setCnh(mascaraCNH(texto))}
-                icone={<CreditCard size={18} />}
-              />
-            )}
-            {erros.cnh && <span className="mensagem-erro">{erros.cnh}</span>}
+            <InputCustomizado
+              label="CNH" type="text" placeholder="Apenas número da CNH"
+              value={cnh}
+              onBlur={() => validarCampo('cnh', cnh)}
+              temErro={!!erros.cnh}
+              onChange={(texto) => setCnh(mascaraCNH(texto))}
+              icone={<CreditCard size={18} />}
+            />
+          )}
+          {erros.cnh && <span className="mensagem-erro">{erros.cnh}</span>}
 
           <InputCustomizado
             label="E-MAIL" type="email" placeholder="nome@exemplo.com"
             value={email} onChange={setEmail}
             onBlur={() => validarCampo('email', email)}
             temErro={!!erros.email}
-            />
-              {erros.email && <span className="mensagem-erro">{erros.email}</span>}
+          />
+          {erros.email && <span className="mensagem-erro">{erros.email}</span>}
 
           <InputCustomizado
             label="TELEFONE" type="text" placeholder="(83) 99999-9999"
@@ -231,7 +222,7 @@ export function Cadastro() {
             temErro={!!erros.telefone}
             icone={<Phone size={18} />}
           />
-            {erros.telefone && <span className="mensagem-erro">{erros.telefone}</span>}
+          {erros.telefone && <span className="mensagem-erro">{erros.telefone}</span>}
 
           <InputCustomizado
             label="SENHA" type="password" placeholder="••••••••"
@@ -240,7 +231,7 @@ export function Cadastro() {
             temErro={!!erros.senha}
             icone={<Lock size={18} />}
           />
-            {erros.senha && <span className="mensagem-erro">{erros.senha}</span>}
+          {erros.senha && <span className="mensagem-erro">{erros.senha}</span>}
 
           <div className="termos-container">
             <input type="checkbox"
@@ -257,13 +248,13 @@ export function Cadastro() {
             className="btn-entrar"
             style={{ backgroundColor: '#A83B0E' }}
             disabled={!formularioValido}
-            >
+          >
             Cadastrar
           </button>
         </form>
 
         <div className="rodape">
-          <p>Já tem uma conta? <a href="#">Entrar</a></p>
+          <p>Já tem uma conta? <Link to="/login">Entrar</Link></p>
         </div>
 
       </div>

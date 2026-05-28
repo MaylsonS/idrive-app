@@ -1,11 +1,16 @@
 import { useState } from 'react';
+import { useNavigate, Link} from 'react-router-dom';
 import './Login.css';
 import { authService } from '../../services/authService';
 import { InputCustomizado } from '../../components/InputCustomizado';
+import { useAuthContext } from '../../contexts/AuthContext'
 
-export function Login() {
+export default function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+
+  const navigate = useNavigate();
+  const { storeToken } = useAuthContext();
 
 const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,15 +21,17 @@ const handleLogin = async (e: React.FormEvent) => {
 
       const resposta = await authService.login({ email, senha });
 
-      console.log("✅ [LOGIN] Sucesso! O Spring Boot devolveu:", resposta);
+      console.log("Sucesso! O Spring Boot devolveu:", resposta);
 
-      localStorage.setItem('idrive_token', resposta.token);
-      console.log("🔐 [LOGIN] Token JWT guardado no localStorage com sucesso!");
+      storeToken(resposta.token)
+      navigate('/dashboard')
+
+      console.log("Token JWT guardado no localStorage com sucesso!");
 
       alert("Login realizado com sucesso! (Olhe o console)");
 
     } catch (error) {
-      console.error("❌ [LOGIN] Erro ao fazer login. O Spring Boot recusou:", error);
+      console.error("Erro ao fazer login. O Spring Boot recusou:", error);
       alert("Erro ao fazer login. Verifique se o e-mail e senha estão corretos.");
     }
   };
@@ -72,7 +79,7 @@ const handleLogin = async (e: React.FormEvent) => {
         </form>
 
         <div className="rodape">
-          <p>Não tem uma conta? <a href="#">Criar conta</a></p>
+          <p>Não tem uma conta? <Link to="/cadastro">Criar conta</Link></p>
           <p className="copyright">© 2026 IDRIVE</p>
         </div>
 

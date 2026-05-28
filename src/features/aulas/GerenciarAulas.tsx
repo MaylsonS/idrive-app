@@ -1,11 +1,12 @@
 // src/features/aulas/GerenciarAulas.tsx
 import { useState } from 'react';
 import { Sidebar } from '../../components/Sidebar';
+import { useNavigate, Link } from 'react-router-dom';
 import { aulaService} from '../../services/aulaService';
 import type { AulaRequestDTO } from '../../services/aulaService';
 
 
-export function GerenciarAulas() {
+export default function GerenciarAulas() {
   const [data, setData] = useState('');
   const [horaInicio, setHoraInicio] = useState('');
   const [horaFim, setHoraFim] = useState('');
