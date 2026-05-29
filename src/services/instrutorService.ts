@@ -12,7 +12,7 @@ export interface InstrutorRegistroDTO {
 
 export const instrutorService = {
   registrar: async (dados: InstrutorRegistroDTO) => {
-    const response = await api.post('/instrutores/register', dados);
+    const response = await api.post('/auth/register-instrutor', dados);
     return response.data;
   }
 };
