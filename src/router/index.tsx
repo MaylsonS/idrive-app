@@ -1,11 +1,12 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { lazy } from "react";
+import PrivateRoute from "./PrivateRoute";
 
-const PrivateRoute = lazy(() => import("./PrivateRoute"));
 const Login = lazy(() => import("../features/auth/Login"));
 const Cadastro = lazy(() => import("../features/auth/Cadastro"));
 const Dashboard = lazy(() => import("../features/dashboard/Dashboard"));
 const GerenciarAulas = lazy(() => import("../features/aulas/GerenciarAulas"));
+const Anuncios = lazy(() => import("../features/anuncios/Anuncios"));
 
 export const router = createBrowserRouter([
     {
@@ -16,7 +17,6 @@ export const router = createBrowserRouter([
     {
         path: "/login",
         element: <Login />,
-        index: true,
     },
     {
         path: "/cadastro",
@@ -24,10 +24,19 @@ export const router = createBrowserRouter([
     },
     {
         path: "/dashboard",
-        element: <PrivateRoute> <Dashboard /> </PrivateRoute>,
+        element: <Dashboard />,
     },
     {
         path: "/aulas",
-        element: <PrivateRoute> <GerenciarAulas /> </PrivateRoute>,
-    }
+        element:<GerenciarAulas />,
+    },
+    {
+        path: "/anuncios",
+        element: <Anuncios />,
+    },
 ]);
+
+//   {
+//         path: "/dashboard",
+//         element: <PrivateRoute> <Dashboard /> </PrivateRoute>,
+//     },

@@ -1,10 +1,8 @@
-// src/features/aulas/GerenciarAulas.tsx
 import { useState } from 'react';
 import { Sidebar } from '../../components/Sidebar';
-import { useNavigate, Link } from 'react-router-dom';
-import { aulaService} from '../../services/aulaService';
+import { aulaService } from '../../services/aulaService';
 import type { AulaRequestDTO } from '../../services/aulaService';
-
+import './GerenciarAulas.css';
 
 export default function GerenciarAulas() {
   const [data, setData] = useState('');
@@ -23,93 +21,174 @@ export default function GerenciarAulas() {
       const payload: AulaRequestDTO = {
         inicio: dataHoraInicio,
         fim: dataHoraFim,
-        valor: parseFloat(valor.replace(',', '.')), // Converte "85,00" para 85.00 numérico
+        valor: parseFloat(valor.replace(',', '.')),
         descricao: descricao
       };
 
-      console.log("Enviando para o Java:", payload);
-
-      const resposta = await aulaService.criarAula(payload);
+      await aulaService.criarAula(payload);
       alert("Horário publicado com sucesso!");
 
       setData(''); setHoraInicio(''); setHoraFim(''); setValor(''); setDescricao('');
 
+      // TODO: Aqui chamaremos a função para recarregar a lista de "Anúncios Ativos" do backend
+
     } catch (error) {
       console.error("Erro ao publicar horário", error);
-      alert("Erro ao publicar horário. Verifique se você está logado como Instrutor.");
+      alert("Erro ao publicar horário. Verifique se você está logado.");
     }
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#F8F9FA' }}>
-      {/* Exemplo mockado como INSTRUTOR */}
-      <Sidebar itemAtivo="AULAS" perfilUsuario="INSTRUTOR" />
+    <div className="layout-app">
+      <Sidebar itemAtivo="AULAS" />
 
-      <main style={{ flex: 1, padding: '40px', overflowY: 'auto' }}>
-        <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '24px', borderBottom: '3px solid #A83B0E', display: 'inline-block', paddingBottom: '5px' }}>
-          Gerenciar Horários
-        </h2>
+      <main className="conteudo-principal">
 
-        <div style={{ display: 'flex', gap: '24px' }}>
+        <header className="header-gerenciar">
+          <h2 className="titulo-gerenciar">Gerenciar Horários</h2>
+          <div className="linha-destaque"></div>
+        </header>
 
-          {/* LADO ESQUERDO: O FORMULÁRIO */}
-          <div style={{ flex: 2, backgroundColor: '#FFF', borderRadius: '12px', padding: '32px', boxShadow: '0px 4px 10px rgba(0,0,0,0.05)', borderLeft: '5px solid #A83B0E' }}>
-            <h3 style={{ marginBottom: '20px', color: '#333' }}>+ Novo Anúncio</h3>
+        <div className="grid-dashboard">
 
-            <form onSubmit={handlePublicar} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="coluna-esquerda">
 
-              <div style={{ display: 'flex', gap: '16px' }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#666' }}>DATA DA AULA</label>
-                  <input type="date" value={data} onChange={e => setData(e.target.value)} required style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #DDD', backgroundColor: '#F2F2F2', marginTop: '5px' }} />
+            <section className="card-formulario">
+              <div className="borda-lateral-form"></div>
+              <h3 className="titulo-secao">
+                <span style={{color: '#9F3B02'}}>+</span> Novo Anúncio
+              </h3>
+
+              <form onSubmit={handlePublicar} className="form-anuncio">
+
+                <div className="linha-inputs">
+                  <div className="grupo-input">
+                    <label>DATA DA AULA</label>
+                    <input
+                      type="date"
+                      className="input-padrao"
+                      value={data}
+                      onChange={e => setData(e.target.value)}
+                      required
+                    />
+                  </div>
                 </div>
+
+                <div className="linha-inputs">
+                  <div className="grupo-input">
+                    <label>HORÁRIO DE INÍCIO</label>
+                    <input
+                      type="time"
+                      className="input-padrao"
+                      value={horaInicio}
+                      onChange={e => setHoraInicio(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="grupo-input">
+                    <label>HORÁRIO DE TÉRMINO</label>
+                    <input
+                      type="time"
+                      className="input-padrao"
+                      value={horaFim}
+                      onChange={e => setHoraFim(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grupo-input">
+                  <label>VALOR DA AULA (R$)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    className="input-padrao"
+                    placeholder="Ex: 85,00"
+                    value={valor}
+                    onChange={e => setValor(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="grupo-input">
+                  <label>DESCRIÇÃO DO ANÚNCIO (OPCIONAL)</label>
+                  <textarea
+                    className="input-padrao"
+                    placeholder="Ex: Aula Focada em aprender os conceitos básicos do transito na pratica..."
+                    value={descricao}
+                    onChange={e => setDescricao(e.target.value)}
+                  ></textarea>
+                </div>
+
+                <button type="submit" className="btn-publicar">
+                  Publicar Horário
+                </button>
+              </form>
+            </section>
+
+            <section>
+              <div className="header-ativos">
+                <h3 className="titulo-secao" style={{marginBottom: 0}}>Meus Anúncios Ativos</h3>
+                <span className="tag-quantidade">2 ABERTOS</span>
               </div>
 
-              <div style={{ display: 'flex', gap: '16px' }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#666' }}>HORÁRIO DE INÍCIO</label>
-                  <input type="time" value={horaInicio} onChange={e => setHoraInicio(e.target.value)} required style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #DDD', backgroundColor: '#F2F2F2', marginTop: '5px' }} />
+              {/* Mock de anúncios ativos - Depois faremos um .map() buscando do backend */}
+              <div className="card-ativo">
+                <div className="info-ativo">
+                  <h4>24 de Outubro</h4>
+                  <p>08:00 - 09:30</p>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#666' }}>HORÁRIO DE TÉRMINO</label>
-                  <input type="time" value={horaFim} onChange={e => setHoraFim(e.target.value)} required style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #DDD', backgroundColor: '#F2F2F2', marginTop: '5px' }} />
-                </div>
+                <div className="preco-ativo">R$ 85,00</div>
               </div>
 
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#666' }}>VALOR DA AULA (R$)</label>
-                <div style={{ position: 'relative', marginTop: '5px' }}>
-                  <span style={{ position: 'absolute', left: '12px', top: '12px', color: '#666' }}>R$</span>
-                  <input type="number" step="0.01" value={valor} onChange={e => setValor(e.target.value)} required placeholder="85,00" style={{ width: '100%', padding: '12px 12px 12px 40px', borderRadius: '8px', border: '1px solid #DDD', backgroundColor: '#F2F2F2' }} />
+              <div className="card-ativo">
+                <div className="info-ativo">
+                  <h4>25 de Outubro</h4>
+                  <p>10:00 - 11:30</p>
                 </div>
+                <div className="preco-ativo">R$ 100,00</div>
               </div>
+            </section>
 
-              <div>
-                <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#666' }}>DESCRIÇÃO DO ANÚNCIO (OPCIONAL)</label>
-                <textarea value={descricao} onChange={e => setDescricao(e.target.value)} placeholder="Ex: Ponto de encontro próximo ao metrô..." rows={3} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #DDD', backgroundColor: '#F2F2F2', marginTop: '5px', resize: 'none' }}></textarea>
-              </div>
-
-              <button type="submit" style={{ backgroundColor: '#D95C14', color: '#FFF', border: 'none', padding: '16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}>
-                Publicar Horário
-              </button>
-
-            </form>
           </div>
 
-          {/* LADO DIREITO: HISTÓRICO DE ANÚNCIOS (MOCK) */}
-          <div style={{ flex: 1, backgroundColor: '#F0F2F5', borderRadius: '12px', padding: '24px' }}>
-            <h3 style={{ fontSize: '16px', color: '#333', marginBottom: '20px' }}>Histórico de Anúncios</h3>
-            {/* Aqui depois faremos um .map() buscando as aulas do instrutor! */}
-            <div style={{ backgroundColor: '#FFF', padding: '16px', borderRadius: '8px', marginBottom: '10px', borderLeft: '4px solid #4CAF50' }}>
-               <p style={{ fontWeight: 'bold', fontSize: '14px', margin: 0 }}>20 Out, 14:00</p>
-               <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>RESERVADO • R$ 85,00</p>
-            </div>
-            <div style={{ backgroundColor: '#FFF', padding: '16px', borderRadius: '8px', marginBottom: '10px', borderLeft: '4px solid #F44336' }}>
-               <p style={{ fontWeight: 'bold', fontSize: '14px', margin: 0 }}>19 Out, 09:00</p>
-               <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>CANCELADO PELO INSTRUTOR</p>
-            </div>
-          </div>
+          {/* COLUNA DIREITA (HISTÓRICO) */}
+          <aside className="coluna-direita">
 
+            <div className="historico-header">
+              <h3 className="titulo-secao" style={{marginBottom: 0}}>Histórico</h3>
+              {/* Avaliação média adicionada aqui! */}
+              <div className="media-avaliacao">
+                <span>★</span> 4.9 <span style={{fontSize: '11px', color: '#64748B'}}>(12)</span>
+              </div>
+            </div>
+
+            {/* Mock de Histórico */}
+            <div className="item-historico">
+              <div className="icone-historico">📅</div>
+              <div>
+                <p style={{fontWeight: 700, color: '#2C2F31'}}>20 Out, 14:00</p>
+                <p style={{fontSize: '11px', color: '#595C5E', textTransform: 'uppercase'}}>Reservado • R$ 85,00</p>
+              </div>
+            </div>
+
+            <div className="item-historico">
+              <div className="icone-historico">❌</div>
+              <div>
+                <p style={{fontWeight: 700, color: '#2C2F31'}}>19 Out, 09:00</p>
+                <p style={{fontSize: '11px', color: '#595C5E', textTransform: 'uppercase'}}>Cancelado pelo Instrutor</p>
+              </div>
+            </div>
+
+            <div className="item-historico">
+              <div className="icone-historico">📅</div>
+              <div>
+                <p style={{fontWeight: 700, color: '#2C2F31'}}>18 Out, 16:30</p>
+                <p style={{fontSize: '11px', color: '#595C5E', textTransform: 'uppercase'}}>Concluído • R$ 85,00</p>
+              </div>
+            </div>
+
+          </aside>
         </div>
       </main>
     </div>

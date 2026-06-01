@@ -3,7 +3,7 @@
 /* ===== LAYOUT ===== */
 .conteudo-principal {
     margin-left: 260px;
-    padding: 112px 40px 48px;
+    padding: 26px 40px 48px;
     background: #F4F7FB;
     min-height: 100vh;
     display: flex;
@@ -12,7 +12,6 @@
     font-family: 'Manrope', sans-serif;
 }
 
-/* ===== HERO ===== */
 .hero-anuncios {
     position: relative;
     width: 100%;

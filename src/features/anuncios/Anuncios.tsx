@@ -21,7 +21,7 @@ function calcularDuracao(inicio: string, fim: string) {
     return h > 0 ? `${h}h${m > 0 ? 'min' : ''}` : `${m}min`;
 }
 
-const FILTROS = ['Todos', 'Câmbio Manual', 'Câmbio Automático', 'Veículos Elétricos', 'Direção Defensiva'];
+const FILTROS = ['Todos', 'Câmbio Manual', 'Câmbio Automático', 'Motocicletas', 'Baliza'];
 
 export default function Anuncios() {
     const [anuncios, setAnuncios] = useState<AulaResponseDTO[]>([]);
@@ -41,7 +41,7 @@ export default function Anuncios() {
 
     return (
         <div className="layout-app">
-            <Sidebar itemAtivo="ANUNCIOS" />
+            <Sidebar itemAtivo="INICIO" />
 
             <main className="conteudo-principal">
 
@@ -75,7 +75,6 @@ export default function Anuncios() {
                     ))}
                 </div>
 
-                {/* Estados */}
                 {loading && (
                     <div className="estado-centralizado">
                         <div className="spinner" />
@@ -99,7 +98,6 @@ export default function Anuncios() {
                     </div>
                 )}
 
-                {/* Grid de cards */}
                 {!loading && !erro && anuncios.length > 0 && (
                     <div className="anuncios-grid">
                         {anuncios.map(anuncio => (
@@ -130,7 +128,6 @@ function CardAnuncio({ anuncio, isInstrutor }: { anuncio: AulaResponseDTO; isIns
     return (
         <div className="card-anuncio">
 
-            {/* Topo: avatar + nome + rating */}
             <div className="card-topo">
                 <div className="card-avatar-wrap">
                     <div className="card-avatar" style={{ background: cor }}>
@@ -151,7 +148,6 @@ function CardAnuncio({ anuncio, isInstrutor }: { anuncio: AulaResponseDTO; isIns
                 </div>
             </div>
 
-            {/* Descrição */}
             <p className="card-descricao">
                 {anuncio.descricao || (isInstrutor
                     ? 'Aluno buscando instrutor para aulas práticas.'
@@ -159,7 +155,6 @@ function CardAnuncio({ anuncio, isInstrutor }: { anuncio: AulaResponseDTO; isIns
                 )}
             </p>
 
-            {/* Divisor + Valor + Botões */}
             <div className="card-rodape">
                 <div className="card-preco">
                     <span className="preco-label">POR AULA</span>
