@@ -1,89 +1,62 @@
 import { useState } from 'react';
-import { useNavigate, Link} from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './Login.css';
 import { authService } from '../../services/authService';
 import { InputCustomizado } from '../../components/InputCustomizado';
-import { useAuthContext } from '../../contexts/AuthContext'
+import { useAuthContext } from '../../contexts/AuthContext';
+
+function decodificarPerfil(token: string): 'ALUNO' | 'INSTRUTOR' | null {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.tipoPerfil ?? null;
+    } catch {
+        return null;
+    }
+}
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
+    const [email, setEmail] = useState('');
+    const [senha, setSenha] = useState('');
+    const navigate = useNavigate();
+    const { storeToken } = useAuthContext();
 
-  const navigate = useNavigate();
-  const { storeToken } = useAuthContext();
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const resposta = await authService.login({ email, senha });
+            const perfil = decodificarPerfil(resposta.token);
+            storeToken(resposta.token, perfil);
+            navigate('/dashboard');
+        } catch (error) {
+            console.error("Erro ao fazer login:", error);
+            alert("E-mail ou senha incorretos.");
+        }
+    };
 
-const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+    return (
+        <div className="background-tela">
+            <div className="card-login">
+                <div className="logo-container">
+                    <h1 className="logo-texto"><span className="triangulo">▲</span> IDrive</h1>
+                </div>
+                <h2 className="titulo">Bem-vindo de volta</h2>
+                <p className="subtitulo">Acesse sua conta para continuar.</p>
 
-    try {
-      console.log("Iniciando requisição para o Spring Boot...");
-      console.log(" Dados enviados:", { email, senha });
+                <button className="btn-google">Entrar com Google</button>
 
-      const resposta = await authService.login({ email, senha });
+                <div className="divisor"><span>OU E-MAIL</span></div>
 
-      console.log("Sucesso! O Spring Boot devolveu:", resposta);
+                <form onSubmit={handleLogin}>
+                    <InputCustomizado label="E-MAIL" type="email" placeholder="seu@email.com" value={email} onChange={setEmail} />
+                    <InputCustomizado label="SENHA" type="password" placeholder="••••••••" value={senha} onChange={setSenha} temLinkEsqueceuSenha={true} />
+                    <button type="submit" className="btn-entrar">Entrar</button>
+                </form>
 
-      storeToken(resposta.token)
-      navigate('/dashboard')
-
-      console.log("Token JWT guardado no localStorage com sucesso!");
-
-      alert("Login realizado com sucesso! (Olhe o console)");
-
-    } catch (error) {
-      console.error("Erro ao fazer login. O Spring Boot recusou:", error);
-      alert("Erro ao fazer login. Verifique se o e-mail e senha estão corretos.");
-    }
-  };
-
-  return (
-    <div className="background-tela">
-      <div className="card-login">
-
-        <div className="logo-container">
-          <h1 className="logo-texto"><span className="triangulo">▲</span> IDrive</h1>
+                <div className="rodape">
+                    <p>Não tem uma conta? <Link to="/cadastro">Criar conta</Link></p>
+                    <p className="copyright">© 2026 IDRIVE</p>
+                </div>
+            </div>
         </div>
-        <h2 className="titulo">Bem-vindo de volta</h2>
-        <p className="subtitulo">Acesse sua conta para continuar.</p>
-
-        <button className="btn-google">
-           Entrar com Google
-        </button>
-
-        <div className="divisor">
-          <span>OU E-MAIL</span>
-        </div>
-
-        <form onSubmit={handleLogin}>
-
-          <InputCustomizado
-            label="E-MAIL"
-            type="email"
-            placeholder="seu@email.com"
-            value={email}
-            onChange={setEmail}
-          />
-
-          <InputCustomizado
-            label="SENHA"
-            type="password"
-            placeholder="••••••••"
-            value={senha}
-            onChange={setSenha}
-            temLinkEsqueceuSenha={true}
-          />
-
-          <button type="submit" className="btn-entrar">
-            Entrar
-          </button>
-        </form>
-
-        <div className="rodape">
-          <p>Não tem uma conta? <Link to="/cadastro">Criar conta</Link></p>
-          <p className="copyright">© 2026 IDRIVE</p>
-        </div>
-
-      </div>
-    </div>
-  );
+    );
 }

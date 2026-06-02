@@ -1,5 +1,5 @@
 import './Sidebar.css';
-import { Home, Calendar, MessageSquare, User, LogOut, Bell, Compass, Settings} from 'lucide-react';
+import { Home, Calendar, MessageSquare, User, LogOut, Bell, Compass, Settings, PlusCircle, ChartNoAxesCombined} from 'lucide-react';
 import iconLogo from '../assets/icons/icon-logo.svg';
 import { useAuthContext } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
@@ -19,22 +19,26 @@ export function Sidebar({ itemAtivo }: SidebarProps) {
 
     return (
         <aside className="sidebar-container">
+
             <div className="sidebar-logo">
                 <h1 className="logo-texto">
                     <img src={iconLogo} alt="Logo IDrive" className="icon-logo" />
                     IDrive
                 </h1>
-                <span style={{ fontSize: '12px', color: '#666', marginLeft: '45px' }}>
+                <span className="sidebar-portal-label">
                     Portal do {tipoPerfil === 'INSTRUTOR' ? 'Instrutor' : 'Aluno'}
                 </span>
             </div>
 
             <nav className="sidebar-nav">
-                <Link to="/anuncios" className={`nav-item ${itemAtivo === 'INICIO' ? 'ativo' : ''}`}>
-                    <Compass size={20} /> <span>Início</span>
+
+                <Link to="/anuncios" className={`nav-item ${itemAtivo === 'ANUNCIOS' ? 'ativo' : ''}`}>
+                    <Compass size={20} /> <span>Explorar Anúncios</span>
                 </Link>
 
-
+                <Link to="/dashboard" className={`nav-item ${itemAtivo === 'INICIO' ? 'ativo' : ''}`}>
+                    <ChartNoAxesCombined size={20} /> <span>Dashboard</span>
+                </Link>
 
                 <Link to="/aulas" className={`nav-item ${itemAtivo === 'AULAS' ? 'ativo' : ''}`}>
                     <Calendar size={20} />
@@ -55,15 +59,21 @@ export function Sidebar({ itemAtivo }: SidebarProps) {
                     <User size={20} /> <span>Perfil</span>
                 </Link>
 
-                <Link to="#" className={`nav-item ${itemAtivo === 'PERFIL' ? 'ativo' : ''}`}>
-                      <Settings size={20} /> <span>Configuração</span>
+                <Link to="/configuracoes" className={`nav-item ${itemAtivo === 'CONFIGURACAO' ? 'ativo' : ''}`}>
+                    <Settings size={20} /> <span>Configurações</span>
                 </Link>
-
             </nav>
 
             <div className="sidebar-footer">
-                <button className="btn-sair" onClick={handleSair} style={{ display: 'flex', gap: '10px', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}>
-                    <LogOut size={20} /> Sair
+                <Link to="/aulas" className="btn-criar-anuncio">
+                    <PlusCircle size={18} />
+                    <span>Criar Anúncio</span>
+                </Link>
+
+                <div className="footer-divisor" />
+
+                <button className="btn-sair" onClick={handleSair}>
+                    <LogOut size={18} /> <span>Sair</span>
                 </button>
             </div>
         </aside>

@@ -28,7 +28,7 @@ export const router = createBrowserRouter([
     },
     {
         path: "/aulas",
-        element:<GerenciarAulas />,
+        element: <GerenciarAulas />,
     },
     {
         path: "/anuncios",
@@ -36,7 +36,8 @@ export const router = createBrowserRouter([
     },
 ]);
 
-//   {
-//         path: "/dashboard",
-//         element: <PrivateRoute> <Dashboard /> </PrivateRoute>,
-//     },
+
+  // {
+  //      path: "/anuncios",
+  //      element: <PrivateRoute><Anuncios /></PrivateRoute>,
+  //  }

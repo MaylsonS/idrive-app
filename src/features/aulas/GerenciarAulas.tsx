@@ -1,196 +1,262 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sidebar } from '../../components/Sidebar';
 import { aulaService } from '../../services/aulaService';
-import type { AulaRequestDTO } from '../../services/aulaService';
+import type { AulaRequestDTO, AulaResponseDTO } from '../../services/aulaService';
+import { useAuthContext } from '../../contexts/AuthContext';
 import './GerenciarAulas.css';
 
+function formatarDataExtenso(iso: string) {
+    return new Date(iso).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
+}
+
+function formatarHora(iso: string) {
+    return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
 export default function GerenciarAulas() {
-  const [data, setData] = useState('');
-  const [horaInicio, setHoraInicio] = useState('');
-  const [horaFim, setHoraFim] = useState('');
-  const [valor, setValor] = useState('');
-  const [descricao, setDescricao] = useState('');
+    const { tipoPerfil } = useAuthContext();
 
-  const handlePublicar = async (e: React.FormEvent) => {
-    e.preventDefault();
+    // Form state
+    const [data, setData] = useState('');
+    const [horaInicio, setHoraInicio] = useState('');
+    const [horaFim, setHoraFim] = useState('');
+    const [valor, setValor] = useState('');
+    const [descricao, setDescricao] = useState('');
+    const [enviando, setEnviando] = useState(false);
 
-    try {
-      const dataHoraInicio = `${data}T${horaInicio}:00`;
-      const dataHoraFim = `${data}T${horaFim}:00`;
+    // Anúncios ativos — buscados do back
+    const [anunciosAtivos, setAnunciosAtivos] = useState<AulaResponseDTO[]>([]);
+    const [loadingAtivos, setLoadingAtivos] = useState(true);
 
-      const payload: AulaRequestDTO = {
-        inicio: dataHoraInicio,
-        fim: dataHoraFim,
-        valor: parseFloat(valor.replace(',', '.')),
-        descricao: descricao
-      };
+    // Histórico — todos os meus anúncios
+    const [historico, setHistorico] = useState<AulaResponseDTO[]>([]);
+    const [loadingHistorico, setLoadingHistorico] = useState(true);
 
-      await aulaService.criarAula(payload);
-      alert("Horário publicado com sucesso!");
-
-      setData(''); setHoraInicio(''); setHoraFim(''); setValor(''); setDescricao('');
-
-      // TODO: Aqui chamaremos a função para recarregar a lista de "Anúncios Ativos" do backend
-
-    } catch (error) {
-      console.error("Erro ao publicar horário", error);
-      alert("Erro ao publicar horário. Verifique se você está logado.");
+    function carregarDados() {
+        // Anúncios ativos = minhas aulas com status ABERTA
+        aulaService.listarMinhasAulas()
+            .then(data => {
+                setAnunciosAtivos(data.filter(a => a.status === 'ABERTA'));
+                setHistorico(data.filter(a => a.status !== 'ABERTA'));
+            })
+            .catch(console.error)
+            .finally(() => {
+                setLoadingAtivos(false);
+                setLoadingHistorico(false);
+            });
     }
-  };
 
-  return (
-    <div className="layout-app">
-      <Sidebar itemAtivo="AULAS" />
+    useEffect(() => {
+        carregarDados();
+    }, []);
 
-      <main className="conteudo-principal">
+    const handlePublicar = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setEnviando(true);
+        try {
+            const payload: AulaRequestDTO = {
+                inicio: `${data}T${horaInicio}:00`,
+                fim: `${data}T${horaFim}:00`,
+                valor: parseFloat(valor.replace(',', '.')),
+                descricao: descricao
+            };
+            await aulaService.criarAula(payload);
+            alert('Anúncio publicado com sucesso!');
+            setData(''); setHoraInicio(''); setHoraFim(''); setValor(''); setDescricao('');
+            carregarDados(); // Recarrega a lista após publicar
+        } catch (error) {
+            console.error('Erro ao publicar', error);
+            alert('Erro ao publicar. Verifique se está logado.');
+        } finally {
+            setEnviando(false);
+        }
+    };
 
-        <header className="header-gerenciar">
-          <h2 className="titulo-gerenciar">Gerenciar Horários</h2>
-          <div className="linha-destaque"></div>
-        </header>
+    function iconeStatus(status: AulaResponseDTO['status']) {
+        const map = { ACEITA: '✅', CONCLUIDA: '✅', CANCELADA: '❌', ABERTA: '📅' };
+        return map[status];
+    }
 
-        <div className="grid-dashboard">
+    function tagStatus(status: AulaResponseDTO['status']) {
+        const map = {
+            ABERTA: { label: 'Aberta', bg: 'rgba(253,128,71,0.2)', color: '#8C3300' },
+            ACEITA: { label: 'Aceita', bg: 'rgba(216,227,251,0.6)', color: '#455064' },
+            CONCLUIDA: { label: 'Concluída', bg: 'rgba(187,247,208,0.6)', color: '#166534' },
+            CANCELADA: { label: 'Cancelada', bg: 'rgba(254,202,202,0.6)', color: '#991B1B' },
+        };
+        return map[status];
+    }
 
-          <div className="coluna-esquerda">
+    return (
+        <div className="layout-app">
+            <Sidebar itemAtivo="AULAS" />
 
-            <section className="card-formulario">
-              <div className="borda-lateral-form"></div>
-              <h3 className="titulo-secao">
-                <span style={{color: '#9F3B02'}}>+</span> Novo Anúncio
-              </h3>
+            <main className="conteudo-principal">
 
-              <form onSubmit={handlePublicar} className="form-anuncio">
+                <header className="header-gerenciar">
+                    <h2 className="titulo-gerenciar">Gerenciar Horários</h2>
+                    <div className="linha-destaque" />
+                </header>
 
-                <div className="linha-inputs">
-                  <div className="grupo-input">
-                    <label>DATA DA AULA</label>
-                    <input
-                      type="date"
-                      className="input-padrao"
-                      value={data}
-                      onChange={e => setData(e.target.value)}
-                      required
-                    />
-                  </div>
+                <div className="grid-dashboard">
+
+                    {/* COLUNA ESQUERDA */}
+                    <div className="coluna-esquerda">
+
+                        {/* Formulário */}
+                        <section className="card-formulario">
+                            <div className="borda-lateral-form" />
+                            <h3 className="titulo-secao">
+                                <span style={{ color: '#9F3B02' }}>＋</span> Novo Anúncio
+                            </h3>
+
+                            <form onSubmit={handlePublicar} className="form-anuncio">
+                                <div className="linha-inputs">
+                                    <div className="grupo-input">
+                                        <label>DATA DA AULA</label>
+                                        <input type="date" className="input-padrao" value={data}
+                                            onChange={e => setData(e.target.value)} required />
+                                    </div>
+                                    <div className="grupo-input">
+                                        <label>TIPO DE CÂMBIO</label>
+                                        <select className="input-padrao select-padrao">
+                                            <option>Manual</option>
+                                            <option>Automático</option>
+                                            <option>Elétrico</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="linha-inputs">
+                                    <div className="grupo-input">
+                                        <label>HORÁRIO DE INÍCIO</label>
+                                        <input type="time" className="input-padrao" value={horaInicio}
+                                            onChange={e => setHoraInicio(e.target.value)} required />
+                                    </div>
+                                    <div className="grupo-input">
+                                        <label>HORÁRIO DE TÉRMINO</label>
+                                        <input type="time" className="input-padrao" value={horaFim}
+                                            onChange={e => setHoraFim(e.target.value)} required />
+                                    </div>
+                                </div>
+
+                                <div className="grupo-input">
+                                    <label>VALOR DA AULA (R$)</label>
+                                    <div className="input-valor-wrap">
+                                        <span className="prefixo-rs">R$</span>
+                                        <input type="number" step="0.01" className="input-padrao input-com-prefixo"
+                                            placeholder="85,00" value={valor}
+                                            onChange={e => setValor(e.target.value)} required />
+                                    </div>
+                                </div>
+
+                                <div className="grupo-input">
+                                    <label>DESCRIÇÃO DO ANÚNCIO (OPCIONAL)</label>
+                                    <textarea className="input-padrao" rows={3}
+                                        placeholder="Ex: Ponto de encontro próximo ao metrô..."
+                                        value={descricao} onChange={e => setDescricao(e.target.value)} />
+                                </div>
+
+                                <button type="submit" className="btn-publicar" disabled={enviando}>
+                                    {enviando ? 'Publicando...' : 'Publicar Horário'}
+                                </button>
+                            </form>
+                        </section>
+
+                        {/* Anúncios Ativos */}
+                        <section>
+                            <div className="header-ativos">
+                                <h3 className="titulo-secao" style={{ marginBottom: 0 }}>
+                                    Anúncios Ativos
+                                </h3>
+                                <span className="tag-quantidade">
+                                    {anunciosAtivos.length} DISPONÍVEIS
+                                </span>
+                            </div>
+
+                            {loadingAtivos && <p style={{ color: '#999', fontSize: '14px' }}>Carregando...</p>}
+
+                            {!loadingAtivos && anunciosAtivos.length === 0 && (
+                                <p style={{ color: '#999', fontSize: '14px' }}>Nenhum anúncio aberto no momento.</p>
+                            )}
+
+                            {anunciosAtivos.map(a => {
+                                const tag = tagStatus(a.status);
+                                return (
+                                    <div key={a.id} className="card-ativo">
+                                        <div className="card-ativo-topo">
+                                            <span className="tag-status-ativo" style={{ background: tag.bg, color: tag.color }}>
+                                                {tag.label}
+                                            </span>
+                                            <button className="btn-lixo" title="Cancelar anúncio">🗑</button>
+                                        </div>
+                                        <div className="info-ativo">
+                                            <h4>{formatarDataExtenso(a.inicio)}</h4>
+                                            <p>{formatarHora(a.inicio)} – {formatarHora(a.fim)}</p>
+                                        </div>
+                                        <div className="card-ativo-rodape">
+                                            <span className="preco-ativo">R$ {a.valor.toFixed(2).replace('.', ',')}</span>
+                                            <span style={{ fontSize: '12px', color: '#595C5E' }}>Aguardando {tipoPerfil === 'INSTRUTOR' ? 'aluno' : 'instrutor'}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </section>
+
+                    </div>
+
+                    {/* COLUNA DIREITA */}
+                    <aside className="coluna-direita">
+
+                        {/* Nota média — dado real do back quando disponível */}
+                        <div className="card-nota-media">
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                Avaliação Média
+                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                                <span style={{ color: '#E16B34', fontSize: '20px' }}>★</span>
+                                <span style={{ fontWeight: 800, fontSize: '24px', color: '#2C2F31' }}>
+                                    {/* TODO: buscar notaMedia do perfil do usuário logado */}
+                                    --/5
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Histórico */}
+                        <div className="historico-titulo">
+                            <span style={{ fontSize: '16px' }}>🕐</span>
+                            <h3 className="titulo-secao" style={{ marginBottom: 0, fontSize: '18px' }}>
+                                Histórico de Anúncios
+                            </h3>
+                        </div>
+
+                        {loadingHistorico && <p style={{ color: '#999', fontSize: '14px', padding: '0 0 12px' }}>Carregando...</p>}
+
+                        {!loadingHistorico && historico.length === 0 && (
+                            <p style={{ color: '#999', fontSize: '14px', padding: '0 0 12px' }}>Sem histórico ainda.</p>
+                        )}
+
+                        {historico.map(a => (
+                            <div key={a.id} className="item-historico">
+                                <div className="icone-historico">{iconeStatus(a.status)}</div>
+                                <div>
+                                    <p style={{ fontWeight: 700, color: '#2C2F31', fontSize: '14px', margin: 0 }}>
+                                        {formatarDataExtenso(a.inicio)}, {formatarHora(a.inicio)}
+                                    </p>
+                                    <p style={{ fontSize: '11px', color: '#595C5E', textTransform: 'uppercase', margin: 0 }}>
+                                        {tagStatus(a.status).label} • R$ {a.valor.toFixed(2).replace('.', ',')}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+
+                        <button className="btn-ver-historico">
+                            Ver histórico completo →
+                        </button>
+                    </aside>
+
                 </div>
-
-                <div className="linha-inputs">
-                  <div className="grupo-input">
-                    <label>HORÁRIO DE INÍCIO</label>
-                    <input
-                      type="time"
-                      className="input-padrao"
-                      value={horaInicio}
-                      onChange={e => setHoraInicio(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="grupo-input">
-                    <label>HORÁRIO DE TÉRMINO</label>
-                    <input
-                      type="time"
-                      className="input-padrao"
-                      value={horaFim}
-                      onChange={e => setHoraFim(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grupo-input">
-                  <label>VALOR DA AULA (R$)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    className="input-padrao"
-                    placeholder="Ex: 85,00"
-                    value={valor}
-                    onChange={e => setValor(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="grupo-input">
-                  <label>DESCRIÇÃO DO ANÚNCIO (OPCIONAL)</label>
-                  <textarea
-                    className="input-padrao"
-                    placeholder="Ex: Aula Focada em aprender os conceitos básicos do transito na pratica..."
-                    value={descricao}
-                    onChange={e => setDescricao(e.target.value)}
-                  ></textarea>
-                </div>
-
-                <button type="submit" className="btn-publicar">
-                  Publicar Horário
-                </button>
-              </form>
-            </section>
-
-            <section>
-              <div className="header-ativos">
-                <h3 className="titulo-secao" style={{marginBottom: 0}}>Meus Anúncios Ativos</h3>
-                <span className="tag-quantidade">2 ABERTOS</span>
-              </div>
-
-              {/* Mock de anúncios ativos - Depois faremos um .map() buscando do backend */}
-              <div className="card-ativo">
-                <div className="info-ativo">
-                  <h4>24 de Outubro</h4>
-                  <p>08:00 - 09:30</p>
-                </div>
-                <div className="preco-ativo">R$ 85,00</div>
-              </div>
-
-              <div className="card-ativo">
-                <div className="info-ativo">
-                  <h4>25 de Outubro</h4>
-                  <p>10:00 - 11:30</p>
-                </div>
-                <div className="preco-ativo">R$ 100,00</div>
-              </div>
-            </section>
-
-          </div>
-
-          {/* COLUNA DIREITA (HISTÓRICO) */}
-          <aside className="coluna-direita">
-
-            <div className="historico-header">
-              <h3 className="titulo-secao" style={{marginBottom: 0}}>Histórico</h3>
-              {/* Avaliação média adicionada aqui! */}
-              <div className="media-avaliacao">
-                <span>★</span> 4.9 <span style={{fontSize: '11px', color: '#64748B'}}>(12)</span>
-              </div>
-            </div>
-
-            {/* Mock de Histórico */}
-            <div className="item-historico">
-              <div className="icone-historico">📅</div>
-              <div>
-                <p style={{fontWeight: 700, color: '#2C2F31'}}>20 Out, 14:00</p>
-                <p style={{fontSize: '11px', color: '#595C5E', textTransform: 'uppercase'}}>Reservado • R$ 85,00</p>
-              </div>
-            </div>
-
-            <div className="item-historico">
-              <div className="icone-historico">❌</div>
-              <div>
-                <p style={{fontWeight: 700, color: '#2C2F31'}}>19 Out, 09:00</p>
-                <p style={{fontSize: '11px', color: '#595C5E', textTransform: 'uppercase'}}>Cancelado pelo Instrutor</p>
-              </div>
-            </div>
-
-            <div className="item-historico">
-              <div className="icone-historico">📅</div>
-              <div>
-                <p style={{fontWeight: 700, color: '#2C2F31'}}>18 Out, 16:30</p>
-                <p style={{fontSize: '11px', color: '#595C5E', textTransform: 'uppercase'}}>Concluído • R$ 85,00</p>
-              </div>
-            </div>
-
-          </aside>
+            </main>
         </div>
-      </main>
-    </div>
-  );
+    );
 }
