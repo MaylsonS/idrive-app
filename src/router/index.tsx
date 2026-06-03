@@ -8,6 +8,7 @@ const Dashboard = lazy(() => import("../features/dashboard/Dashboard"));
 const GerenciarAulas = lazy(() => import("../features/aulas/GerenciarAulas"));
 const Anuncios = lazy(() => import("../features/anuncios/Anuncios"));
 const Perfil = lazy(() => import("../features/perfil/Perfil"));
+const MinhasAulas = lazy(() => import("../features/minhasAulas/MinhasAulas"));
 
 export const router = createBrowserRouter([
     {
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
     {
         path: "/perfil",
         element: <Perfil />,
+    },
+    {
+        path: "/minhas-aulas",
+        element: <MinhasAulas/>,
     },
 ]);
 

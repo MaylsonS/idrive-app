@@ -40,12 +40,12 @@ export function Sidebar({ itemAtivo }: SidebarProps) {
                     <ChartNoAxesCombined size={20} /> <span>Dashboard</span>
                 </Link>
 
-                <Link to="/aulas" className={`nav-item ${itemAtivo === 'AULAS' ? 'ativo' : ''}`}>
+                <Link to="/minhas-aulas" className={`nav-item ${itemAtivo === 'AULAS' ? 'ativo' : ''}`}>
                     <Calendar size={20} />
                     <span>{tipoPerfil === 'INSTRUTOR' ? 'Gerenciar Horários' : 'Minhas Aulas'}</span>
                 </Link>
 
-                <Link to="/chat" className={`nav-item ${itemAtivo === 'CHAT' ? 'ativo' : ''}`}>
+                <Link to="#" className={`nav-item ${itemAtivo === 'CHAT' ? 'ativo' : ''}`}>
                     <MessageSquare size={20} /> <span>Chat</span>
                 </Link>
 
@@ -59,7 +59,7 @@ export function Sidebar({ itemAtivo }: SidebarProps) {
                     <User size={20} /> <span>Perfil</span>
                 </Link>
 
-                <Link to="/configuracoes" className={`nav-item ${itemAtivo === 'CONFIGURACAO' ? 'ativo' : ''}`}>
+                <Link to="/#" className={`nav-item ${itemAtivo === 'CONFIGURACAO' ? 'ativo' : ''}`}>
                     <Settings size={20} /> <span>Configurações</span>
                 </Link>
             </nav>
