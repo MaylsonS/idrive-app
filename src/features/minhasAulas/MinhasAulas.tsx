@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../components/Sidebar';
 import { aulaService, type AulaResponseDTO } from '../../services/aulaService';
 import { useAuthContext } from '../../contexts/AuthContext';
@@ -35,6 +36,7 @@ function formatarDataExtenso(iso: string) {
 // ── Componente ─────────────────────────────────────────────
 export default function MinhasAulas() {
     const { tipoPerfil } = useAuthContext();
+    const navigate = useNavigate();
     const [aulas, setAulas]     = useState<AulaResponseDTO[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -189,9 +191,12 @@ export default function MinhasAulas() {
                                                     <span className="estrela-off">★</span>
                                                 </div>
                                             ) : (
-                                                <button className="btn-avaliar">
-                                                    AVALIAR AULA
-                                                </button>
+                                                <button
+                                            className="btn-avaliar"
+                                            onClick={() => navigate(`/avaliar/${a.id}`)}
+                                        >
+                                            AVALIAR AULA
+                                        </button>
                                             )}
                                         </div>
                                     );

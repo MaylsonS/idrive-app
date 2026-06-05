@@ -9,6 +9,7 @@ const GerenciarAulas = lazy(() => import("../features/aulas/GerenciarAulas"));
 const Anuncios = lazy(() => import("../features/anuncios/Anuncios"));
 const Perfil = lazy(() => import("../features/perfil/Perfil"));
 const MinhasAulas = lazy(() => import("../features/minhasAulas/MinhasAulas"));
+const AvaliarAula  = lazy(() => import("../features/avaliacao/AvaliarAula"));
 
 export const router = createBrowserRouter([
     {
@@ -43,6 +44,14 @@ export const router = createBrowserRouter([
     {
         path: "/minhas-aulas",
         element: <MinhasAulas/>,
+    },
+    {
+        path: "/avaliar",
+        element: <AvaliarAula />,
+    },
+    {
+        path: "/avaliar/:aulaId",
+        element: <PrivateRoute><AvaliarAula /></PrivateRoute>,
     },
 ]);
 

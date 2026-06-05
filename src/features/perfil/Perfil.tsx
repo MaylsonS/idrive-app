@@ -1,4 +1,3 @@
-// src/features/perfil/Perfil.tsx
 import { Sidebar } from '../../components/Sidebar';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { Edit2, Mail, Phone, FileText, Star } from 'lucide-react';
