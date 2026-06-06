@@ -10,6 +10,7 @@ const Anuncios = lazy(() => import("../features/anuncios/Anuncios"));
 const Perfil = lazy(() => import("../features/perfil/Perfil"));
 const MinhasAulas = lazy(() => import("../features/minhasAulas/MinhasAulas"));
 const AvaliarAula  = lazy(() => import("../features/avaliacao/AvaliarAula"));
+const Chat = lazy(() => import("../features/chat/Chat"));
 
 export const router = createBrowserRouter([
     {
@@ -44,6 +45,10 @@ export const router = createBrowserRouter([
     {
         path: "/minhas-aulas",
         element: <MinhasAulas/>,
+    },
+    {
+        path: "/chat/:roomId?",
+        element: <PrivateRoute><Chat /></PrivateRoute>,
     },
     {
         path: "/avaliar",
