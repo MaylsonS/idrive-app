@@ -27,36 +27,30 @@ export const router = createBrowserRouter([
     },
     {
         path: "/dashboard",
-        element: <Dashboard />,
+        element: <PrivateRoute><Dashboard /></PrivateRoute>,
     },
     {
         path: "/aulas",
-        element: <GerenciarAulas />,
+        element: <PrivateRoute><GerenciarAulas /></PrivateRoute>,
     },
     {
         path: "/anuncios",
-        element: <Anuncios />,
+        element: <PrivateRoute><Anuncios /></PrivateRoute>,
     },
     {
         path: "/perfil",
-        element: <Perfil />,
+        element: <PrivateRoute><Perfil /></PrivateRoute>,
     },
     {
         path: "/minhas-aulas",
-        element: <MinhasAulas/>,
+        element: <PrivateRoute><MinhasAulas/></PrivateRoute>,
     },
     {
         path: "/avaliar",
-        element: <AvaliarAula />,
+        element: <PrivateRoute><AvaliarAula /></PrivateRoute>,
     },
     {
         path: "/avaliar/:aulaId",
         element: <PrivateRoute><AvaliarAula /></PrivateRoute>,
     },
 ]);
-
-
-  // {
-  //      path: "/anuncios",
-  //      element: <PrivateRoute><Anuncios /></PrivateRoute>,
-  //  }

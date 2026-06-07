@@ -11,7 +11,7 @@ export interface AlunoRegistroDTO {
 
 export const alunoService = {
   registrar: async (dados: AlunoRegistroDTO) => {
-    const response = await api.post('/usuarios/register', dados);
+    const response = await api.post('/auth/register-aluno', dados);
     return response.data;
   }
 };

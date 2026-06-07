@@ -20,7 +20,7 @@ export interface AulaResponseDTO {
 
 export const aulaService = {
   criarAula: async (dados: AulaRequestDTO) => {
-    const response = await api.post('/aulas', dados);
+    const response = await api.post('/aulas/criar-anuncio', dados);
     return response.data;
   },
 
