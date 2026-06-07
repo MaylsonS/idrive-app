@@ -50,27 +50,43 @@ export default function GerenciarAulas() {
         carregarDados();
     }, []);
 
-    const handlePublicar = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setEnviando(true);
-        try {
-            const payload: AulaRequestDTO = {
-                inicio: `${data}T${horaInicio}:00`,
-                fim: `${data}T${horaFim}:00`,
-                valor: parseFloat(valor.replace(',', '.')),
-                descricao: descricao
-            };
-            await aulaService.criarAula(payload);
-            alert('Anúncio publicado com sucesso!');
-            setData(''); setHoraInicio(''); setHoraFim(''); setValor(''); setDescricao('');
-            carregarDados(); // Recarrega a lista após publicar
-        } catch (error) {
-            console.error('Erro ao publicar', error);
-            alert('Erro ao publicar. Verifique se está logado.');
-        } finally {
-            setEnviando(false);
-        }
-    };
+const handlePublicar = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // ── Validação de data no front ───────────────────────────────────────
+    const dataHoraInicio = new Date(`${data}T${horaInicio}:00`);
+    const dataHoraFim    = new Date(`${data}T${horaFim}:00`);
+    const agora          = new Date();
+
+    if (dataHoraInicio <= agora) {
+        alert('Não é possível criar um anúncio com data e hora anteriores ao momento atual.');
+        return;
+    }
+
+    if (dataHoraFim <= dataHoraInicio) {
+        alert('O horário de término deve ser após o horário de início.');
+        return;
+    }
+
+    setEnviando(true);
+    try {
+        const payload: AulaRequestDTO = {
+            inicio: `${data}T${horaInicio}:00`,
+            fim: `${data}T${horaFim}:00`,
+            valor: parseFloat(valor.replace(',', '.')),
+            descricao: descricao
+        };
+        await aulaService.criarAula(payload);
+        alert('Anúncio publicado com sucesso!');
+        setData(''); setHoraInicio(''); setHoraFim(''); setValor(''); setDescricao('');
+        carregarDados();
+    } catch (error) {
+        console.error('Erro ao publicar', error);
+        alert('Erro ao publicar. Verifique se está logado.');
+    } finally {
+        setEnviando(false);
+    }
+};
 
     function iconeStatus(status: AulaResponseDTO['status']) {
         const map = { ACEITA: '✅', CONCLUIDA: '✅', CANCELADA: '❌', ABERTA: '📅' };
@@ -130,12 +146,12 @@ export default function GerenciarAulas() {
                                 <div className="linha-inputs">
                                     <div className="grupo-input">
                                         <label>HORÁRIO DE INÍCIO</label>
-                                        <input type="time" className="input-padrao" value={horaInicio}
+                                        <input type="time" min={new Date().toISOString().split('T')[0]} className="input-padrao" value={horaInicio}
                                             onChange={e => setHoraInicio(e.target.value)} required />
                                     </div>
                                     <div className="grupo-input">
                                         <label>HORÁRIO DE TÉRMINO</label>
-                                        <input type="time" className="input-padrao" value={horaFim}
+                                        <input type="time" min={new Date().toISOString().split('T')[0]} className="input-padrao" value={horaFim}
                                             onChange={e => setHoraFim(e.target.value)} required />
                                     </div>
                                 </div>

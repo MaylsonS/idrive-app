@@ -2,34 +2,28 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../components/Sidebar';
 import { aulaService, type AulaResponseDTO } from '../../services/aulaService';
+import { perfilService } from '../../services/perfilService';
 import { useAuthContext } from '../../contexts/AuthContext';
 import './Anuncios.css';
 
-function formatarHora(iso: string) {
-    const d = new Date(iso);
-    return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+function gerarRoomId(idA: string, idB: string): string {
+    return [idA, idB].sort().join('_');
 }
 
-function formatarData(iso: string) {
-    const d = new Date(iso);
-    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
-}
-
-function calcularDuracao(inicio: string, fim: string) {
-    const diff = (new Date(fim).getTime() - new Date(inicio).getTime()) / 60000;
-    const h = Math.floor(diff / 60);
-    const m = diff % 60;
-    return h > 0 ? `${h}h${m > 0 ? m + 'min' : ''}` : `${m}min`;
-}
-
-const FILTROS = ['Todos', 'Motocicletas','Câmbio Manual', 'Câmbio Automático', 'Veículos Elétricos', 'Direção Defensiva'];
+const FILTROS = ['Todos', 'Motocicletas', 'Câmbio Manual', 'Câmbio Automático', 'Veículos Elétricos', 'Direção Defensiva'];
 
 export default function Anuncios() {
     const [anuncios, setAnuncios] = useState<AulaResponseDTO[]>([]);
     const [loading, setLoading] = useState(true);
     const [erro, setErro] = useState('');
     const [filtroAtivo, setFiltroAtivo] = useState('Todos');
+    const [meuId, setMeuId] = useState<string | null>(null);
     const { tipoPerfil } = useAuthContext();
+
+    useEffect(() => {
+        // Busca o id do usuário logado uma única vez via /perfil/me
+        perfilService.meuPerfil().then(p => setMeuId(p.id));
+    }, []);
 
     useEffect(() => {
         aulaService.listarAnunciosPublicos()
@@ -44,7 +38,7 @@ export default function Anuncios() {
         ? anuncios
         : anuncios.filter(a =>
             a.descricao?.toLowerCase().includes(filtroAtivo.toLowerCase())
-          );
+        );
 
     return (
         <div className="layout-app">
@@ -52,7 +46,6 @@ export default function Anuncios() {
 
             <main className="conteudo-principal">
 
-                {/* Hero Banner */}
                 <section className="hero-anuncios">
                     <div className="hero-overlay" />
                     <div className="hero-gradient" />
@@ -71,7 +64,6 @@ export default function Anuncios() {
                     </div>
                 </section>
 
-                {/* Filter chips */}
                 <div className="filtros-row">
                     {FILTROS.map(f => (
                         <button
@@ -84,7 +76,6 @@ export default function Anuncios() {
                     ))}
                 </div>
 
-                {/* Estados */}
                 {loading && (
                     <div className="estado-centralizado">
                         <div className="spinner" />
@@ -101,21 +92,21 @@ export default function Anuncios() {
                     </div>
                 )}
 
-                {!loading && !erro && anunciosFiltrados.length === 0 &&(
+                {!loading && !erro && anunciosFiltrados.length === 0 && (
                     <div className="estado-centralizado">
                         <p style={{ fontSize: '48px' }}>📭</p>
                         <p>Nenhum anúncio disponível no momento.</p>
                     </div>
                 )}
 
-                {/* Grid de cards */}
                 {!loading && !erro && anunciosFiltrados.length > 0 && (
                     <div className="anuncios-grid">
-                        {anuncios.map(anuncio => (
+                        {anunciosFiltrados.map(anuncio => (
                             <CardAnuncio
                                 key={anuncio.id}
                                 anuncio={anuncio}
                                 isInstrutor={isInstrutor}
+                                meuId={meuId}
                             />
                         ))}
                     </div>
@@ -126,21 +117,33 @@ export default function Anuncios() {
     );
 }
 
-function CardAnuncio({ anuncio, isInstrutor }: { anuncio: AulaResponseDTO; isInstrutor: boolean }) {
+function CardAnuncio({
+    anuncio,
+    isInstrutor,
+    meuId
+}: {
+    anuncio: AulaResponseDTO;
+    isInstrutor: boolean;
+    meuId: string | null;
+}) {
     const navigate = useNavigate();
-    // Gera cor de avatar baseada no nome
+
     const cores = ['#4F7BEF', '#E16B34', '#10B981', '#8B5CF6', '#F59E0B'];
     const cor = cores[anuncio.autor.charCodeAt(0) % cores.length];
 
-    // Especialidade mock baseada na descrição (futuramente virá do back)
     const especialidade = anuncio.descricao
         ? anuncio.descricao.split(' ').slice(0, 3).join(' ') + '...'
         : isInstrutor ? 'Buscando instrutor' : 'Manual & Auto';
 
+    function handleAgendar() {
+        if (!meuId || !anuncio.autorId) return;
+        const roomId = gerarRoomId(meuId, anuncio.autorId.toString());
+        navigate(`/chat/${roomId}`);
+    }
+
     return (
         <div className="card-anuncio">
 
-            {/* Topo: avatar + nome + rating */}
             <div className="card-topo">
                 <div className="card-avatar-wrap">
                     <div className="card-avatar" style={{ background: cor }}>
@@ -152,7 +155,6 @@ function CardAnuncio({ anuncio, isInstrutor }: { anuncio: AulaResponseDTO; isIns
                     <div className="card-rating">
                         <span className="estrela">★</span>
                         <span className="nota">
-                            {/* Nota virá do back futuramente */}
                             {(4.5 + Math.random() * 0.5).toFixed(1)}
                         </span>
                         <span className="avaliacoes">(--)</span>
@@ -161,7 +163,6 @@ function CardAnuncio({ anuncio, isInstrutor }: { anuncio: AulaResponseDTO; isIns
                 </div>
             </div>
 
-            {/* Descrição */}
             <p className="card-descricao">
                 {anuncio.descricao || (isInstrutor
                     ? 'Aluno buscando instrutor para aulas práticas.'
@@ -169,7 +170,6 @@ function CardAnuncio({ anuncio, isInstrutor }: { anuncio: AulaResponseDTO; isIns
                 )}
             </p>
 
-            {/* Divisor + Valor + Botões */}
             <div className="card-rodape">
                 <div className="card-preco">
                     <span className="preco-label">POR AULA</span>
@@ -179,10 +179,14 @@ function CardAnuncio({ anuncio, isInstrutor }: { anuncio: AulaResponseDTO; isIns
                     </span>
                 </div>
                 <div className="card-acoes">
-                        <button className="btn-ver-perfil" onClick={() => navigate(`/perfil/${anuncio.autorId}`)}>
-                            Ver<br />Perfil
-                        </button>
-                    <button className="btn-agendar">
+                    <button className="btn-ver-perfil" onClick={() => navigate(`/perfil/${anuncio.autorId}`)}>
+                        Ver<br />Perfil
+                    </button>
+                    <button
+                        className="btn-agendar"
+                        onClick={handleAgendar}
+                        disabled={!meuId}
+                    >
                         {isInstrutor ? 'Aceitar' : 'Agendar'}<br />Aula
                     </button>
                 </div>
