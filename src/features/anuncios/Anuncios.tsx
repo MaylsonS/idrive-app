@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../components/Sidebar';
 import { aulaService, type AulaResponseDTO } from '../../services/aulaService';
 import { useAuthContext } from '../../contexts/AuthContext';
@@ -21,7 +22,7 @@ function calcularDuracao(inicio: string, fim: string) {
     return h > 0 ? `${h}h${m > 0 ? m + 'min' : ''}` : `${m}min`;
 }
 
-const FILTROS = ['Todos', 'Câmbio Manual', 'Câmbio Automático', 'Veículos Elétricos', 'Direção Defensiva'];
+const FILTROS = ['Todos', 'Motocicletas','Câmbio Manual', 'Câmbio Automático', 'Veículos Elétricos', 'Direção Defensiva'];
 
 export default function Anuncios() {
     const [anuncios, setAnuncios] = useState<AulaResponseDTO[]>([]);
@@ -38,6 +39,12 @@ export default function Anuncios() {
     }, []);
 
     const isInstrutor = tipoPerfil === 'INSTRUTOR';
+
+    const anunciosFiltrados = filtroAtivo === 'Todos'
+        ? anuncios
+        : anuncios.filter(a =>
+            a.descricao?.toLowerCase().includes(filtroAtivo.toLowerCase())
+          );
 
     return (
         <div className="layout-app">
@@ -94,7 +101,7 @@ export default function Anuncios() {
                     </div>
                 )}
 
-                {!loading && !erro && anuncios.length === 0 && (
+                {!loading && !erro && anunciosFiltrados.length === 0 &&(
                     <div className="estado-centralizado">
                         <p style={{ fontSize: '48px' }}>📭</p>
                         <p>Nenhum anúncio disponível no momento.</p>
@@ -102,7 +109,7 @@ export default function Anuncios() {
                 )}
 
                 {/* Grid de cards */}
-                {!loading && !erro && anuncios.length > 0 && (
+                {!loading && !erro && anunciosFiltrados.length > 0 && (
                     <div className="anuncios-grid">
                         {anuncios.map(anuncio => (
                             <CardAnuncio
@@ -120,6 +127,7 @@ export default function Anuncios() {
 }
 
 function CardAnuncio({ anuncio, isInstrutor }: { anuncio: AulaResponseDTO; isInstrutor: boolean }) {
+    const navigate = useNavigate();
     // Gera cor de avatar baseada no nome
     const cores = ['#4F7BEF', '#E16B34', '#10B981', '#8B5CF6', '#F59E0B'];
     const cor = cores[anuncio.autor.charCodeAt(0) % cores.length];
@@ -171,9 +179,9 @@ function CardAnuncio({ anuncio, isInstrutor }: { anuncio: AulaResponseDTO; isIns
                     </span>
                 </div>
                 <div className="card-acoes">
-                    <button className="btn-ver-perfil">
-                        Ver<br />Perfil
-                    </button>
+                        <button className="btn-ver-perfil" onClick={() => navigate(`/perfil/${anuncio.autorId}`)}>
+                            Ver<br />Perfil
+                        </button>
                     <button className="btn-agendar">
                         {isInstrutor ? 'Aceitar' : 'Agendar'}<br />Aula
                     </button>

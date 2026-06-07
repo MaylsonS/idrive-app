@@ -1,0 +1,558 @@
+/* ── Layout base ─────────────────────────────────────────────────────── */
+
+.conteudo-perfil-pub {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #F5F7F9;
+    min-height: 100vh;
+    overflow-y: auto;
+    min-width: 0;
+}
+
+.perfil-pub-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: 32px 24px 0;
+    max-width: 1024px;
+    width: 100%;
+}
+
+/* ── Top Bar ─────────────────────────────────────────────────────────── */
+
+.topbar-perfil-pub {
+    position: sticky;
+    top: 0;
+    height: 72px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    border-bottom: 1px solid #F1F5F9;
+    z-index: 10;
+    width: 100%;
+}
+
+.topbar-titulo {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0;
+}
+
+.topbar-acoes {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-voltar-pub {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #2C2F31;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 9999px;
+    line-height: 1;
+    transition: background 0.15s;
+}
+
+.btn-voltar-pub:hover {
+    background: #F1F5F9;
+}
+
+.topbar-avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    background: #DFE3E6;
+    border: 2px solid #fff;
+}
+
+/* ── Hero Bento ──────────────────────────────────────────────────────── */
+
+.hero-bento {
+    position: relative;
+    width: 100%;
+    height: 430px;
+}
+
+/* Profile Card — branco, ocupa ~2/3 */
+.profile-card {
+    position: absolute;
+    left: 0;
+    right: 333px;
+    top: 0;
+    height: 430px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 32px;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 32px;
+    overflow: hidden;
+}
+
+.profile-card-kinetic-bg {
+    position: absolute;
+    width: 256px;
+    height: 256px;
+    right: -128px;
+    top: -128px;
+    background: rgba(159, 59, 2, 0.05);
+    border-radius: 9999px;
+    pointer-events: none;
+}
+
+.profile-card-foto-wrap {
+    flex-shrink: 0;
+    width: 192px;
+    height: 192px;
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.profile-card-foto {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+.profile-card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.profile-card-topo {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+}
+
+.badge-verificado-pub {
+    background: rgba(159, 59, 2, 0.1);
+    color: #9F3B02;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 9999px;
+}
+
+.profile-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.estrela-pub {
+    color: #994100;
+    font-size: 14px;
+}
+
+.nota-pub {
+    font-size: 14px;
+    font-weight: 700;
+    color: #994100;
+}
+
+.avaliacoes-pub {
+    font-size: 14px;
+    color: #595C5E;
+}
+
+.profile-nome {
+    font-size: 36px;
+    font-weight: 800;
+    color: #2C2F31;
+    letter-spacing: -0.9px;
+    margin: 0;
+    line-height: 40px;
+}
+
+.profile-descricao {
+    font-size: 16px;
+    color: #595C5E;
+    line-height: 26px;
+    margin: 0;
+    max-width: 576px;
+}
+
+.profile-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
+}
+
+.profile-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #2C2F31;
+}
+
+.meta-icon {
+    font-size: 16px;
+}
+
+/* ── Details Grid ────────────────────────────────────────────────────── */
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    width: 100%;
+    position: relative;
+}
+
+.details-heading {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2C2F31;
+    margin: 0 0 16px;
+}
+
+/* ── Sobre ───────────────────────────────────────────────────────────── */
+
+.details-left {
+    display: flex;
+    flex-direction: column;
+}
+
+.sobre-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.sobre-borda {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #9F3B02;
+}
+
+.sobre-texto {
+    font-size: 16px;
+    color: #595C5E;
+    line-height: 26px;
+    margin: 0;
+}
+
+/* ── Disponibilidade ─────────────────────────────────────────────────── */
+
+.details-right {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.disponibilidade-section {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.disponibilidade-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mes-nav {
+    font-size: 14px;
+    font-weight: 700;
+    color: #595C5E;
+    cursor: pointer;
+}
+
+.calendario-card {
+    background: #EEF1F3;
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.cal-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+}
+
+.cal-dia-label {
+    font-size: 10px;
+    font-weight: 900;
+    color: #595C5E;
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.cal-cell {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 400;
+    color: #2C2F31;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.1s;
+    background: #fff;
+}
+
+.cal-cell:hover:not(.cal-vazio):not(.cal-passado) {
+    background: #f0e6df;
+}
+
+.cal-vazio {
+    background: transparent;
+    cursor: default;
+}
+
+.cal-passado {
+    color: rgba(89, 92, 94, 0.3);
+    cursor: default;
+    background: transparent;
+}
+
+.cal-hoje {
+    background: #fff;
+    font-weight: 700;
+}
+
+.cal-selecionado {
+    background: #9F3B02 !important;
+    color: #FFEFEA !important;
+    font-weight: 700;
+    box-shadow: 0 0 0 4px rgba(159,59,2,0.2), 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+
+/* Horários */
+.horarios-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.horarios-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: #595C5E;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.horarios-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-horario {
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    color: #2C2F31;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-horario:hover {
+    background: #f0e6df;
+}
+
+.btn-horario-ativo {
+    background: #9F3B02 !important;
+    color: #FFEFEA !important;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+
+.btn-horario-indisponivel {
+    background: rgba(255,255,255,0.5) !important;
+    color: rgba(89,92,94,0.5) !important;
+    cursor: not-allowed;
+}
+
+/* ── Avaliações ──────────────────────────────────────────────────────── */
+
+.avaliacoes-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.avaliacoes-card {
+    background: #EEF1F3;
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.avaliacao-item {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.avaliacao-topo {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.avaliacao-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avaliacao-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    background: #CBD5E1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    flex-shrink: 0;
+}
+
+.avaliacao-nome {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2C2F31;
+    margin: 0;
+}
+
+.avaliacao-data {
+    font-size: 10px;
+    color: #595C5E;
+    margin: 0;
+}
+
+.avaliacao-estrelas {
+    color: #994100;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+.avaliacao-texto {
+    font-size: 14px;
+    color: #595C5E;
+    line-height: 23px;
+    margin: 0;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────── */
+
+.footer-perfil-pub {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 48px 0;
+    border-top: 1px solid #F1F5F9;
+    margin-top: 16px;
+    width: 100%;
+}
+
+.footer-perfil-pub span {
+    font-size: 12px;
+    color: #64748B;
+}
+
+.footer-links {
+    display: flex;
+    gap: 24px;
+}
+
+.footer-links a {
+    font-size: 12px;
+    color: #94A3B8;
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    color: #9F3B02;
+}
+
+/* ── Estados ─────────────────────────────────────────────────────────── */
+
+.estado-pub {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 80px 24px;
+    font-size: 14px;
+    color: #8A9AB0;
+}
+
+.estado-erro {
+    color: #991B1B;
+}
+
+.spinner-pub {
+    width: 28px;
+    height: 28px;
+    border: 3px solid #E9EEF4;
+    border-top-color: #9F3B02;
+    border-radius: 50%;
+    animation: spin-pub 0.7s linear infinite;
+}
+
+@keyframes spin-pub {
+    to { transform: rotate(360deg); }
+}
+
+.btn-retry-pub {
+    background: none;
+    border: 1.5px solid #9F3B02;
+    color: #9F3B02;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
