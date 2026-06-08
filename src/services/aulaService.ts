@@ -32,5 +32,10 @@ export const aulaService = {
   listarAnunciosPublicos: async () => {
     const response = await api.get('/aulas/anuncios');
     return response.data as AulaResponseDTO[];
+  },
+
+  listarAulasPorInstrutor: async (instrutorId: string): Promise<AulaResponseDTO[]> => {
+    const response = await api.get(`/aulas/instrutor/${instrutorId}`);
+    return response.data;
   }
 };
