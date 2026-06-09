@@ -17,12 +17,16 @@ api.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
-api.interceptors.response.use( (response) => response,(error) => {
-    if (error.response && error.response.status === 401) {
+
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Agora pegamos tanto o 401 quanto o 403!
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
       localStorage.removeItem("idrive_token");
       window.location.href = "/login";
     }
     return Promise.reject(error);
   }
 );
-

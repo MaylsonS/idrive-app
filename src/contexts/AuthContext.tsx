@@ -11,21 +11,30 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function decodificarPerfil(token: string): TipoPerfil {
+function validarEDecodificarPerfil(token: string): TipoPerfil {
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
+
+        if (payload.exp && payload.exp * 1000 < Date.now()) {
+            return null; // Token expirado
+        }
+
         return payload.tipoPerfil ?? null;
     } catch {
-        return null;
+        return null; // Token inválido
     }
 }
 
 export function AuthContextProvider({ children }: { children: ReactNode }) {
     const tokenSalvo = localStorage.getItem("idrive_token") || "";
-    const [token, setToken] = useState(tokenSalvo);
-    const [tipoPerfil, setTipoPerfil] = useState<TipoPerfil>(
-        tokenSalvo ? decodificarPerfil(tokenSalvo) : null
-    );
+    const perfilValido = tokenSalvo ? validarEDecodificarPerfil(tokenSalvo) : null;
+
+    if (tokenSalvo && !perfilValido) {
+        localStorage.removeItem("idrive_token");
+    }
+
+    const [token, setToken] = useState(perfilValido ? tokenSalvo : "");
+    const [tipoPerfil, setTipoPerfil] = useState<TipoPerfil>(perfilValido);
 
     function storeToken(novoToken: string, perfil: TipoPerfil) {
         localStorage.setItem("idrive_token", novoToken);
