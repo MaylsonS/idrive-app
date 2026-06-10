@@ -7,10 +7,6 @@ import { chatService } from '../../services/chatService';
 import { useAuthContext } from '../../contexts/AuthContext';
 import './Anuncios.css';
 
-function gerarRoomId(idA: string, idB: string): string {
-    return [idA, idB].sort().join('_');
-}
-
 const FILTROS = ['Todos', 'Motocicletas', 'Câmbio Manual', 'Câmbio Automático', 'Veículos Elétricos', 'Direção Defensiva'];
 
 export default function Anuncios() {
@@ -142,9 +138,10 @@ function CardAnuncio({
         }
 
         try {
+            // Usa o autorId normal (que agora é o ID do Usuário)
             const roomIdOficial = await chatService.iniciarConversa(anuncio.autorId.toString());
 
-            // A MÁGICA ESTÁ AQUI: Passamos o nome do autor como state na navegação!
+            // Passamos o nome do autor como state na navegação!
             navigate(`/chat/${roomIdOficial}`, { state: { nomeContato: anuncio.autor } });
         } catch (error) {
             console.error("Erro ao iniciar conversa:", error);
@@ -198,8 +195,7 @@ function CardAnuncio({
                         onClick={handleAgendar}
                         disabled={!meuId}
                     >
-
-                        {isInstrutor ? 'Aceitar' : 'Agendar'}<br />Aula
+                        Conversar
                     </button>
                 </div>
             </div>

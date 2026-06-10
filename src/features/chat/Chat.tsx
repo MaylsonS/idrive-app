@@ -4,6 +4,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { api } from '../../services/api';
 import { perfilService } from '../../services/perfilService';
+import { aulaService, type AulaResponseDTO } from '../../services/aulaService';
 import { Sidebar } from '../../components/Sidebar';
 import './Chat.css';
 
@@ -33,87 +34,71 @@ const Chat: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const nomeContatoNovo = location.state?.nomeContato || '';
+  const nomeContatoNovo = location.state?.nomeContato || 'Novo Contato';
 
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
   const [activeRoom, setActiveRoom] = useState<ChatRoom | null>(null);
   const [messages, setMessages] = useState<MessageEntity[]>([]);
   const [newMessage, setNewMessage] = useState('');
+
+  // Guardamos o ID do logado para saber quem é o outro na sala
+  const [meuId, setMeuId] = useState<string>('');
   const [currentUser, setCurrentUser] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Estado para guardar as aulas que o usuário logado tem ABERTAS
+  const [minhasAulasAbertas, setMinhasAulasAbertas] = useState<AulaResponseDTO[]>([]);
 
   const stompClientRef = useRef<Client | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Busca dados globais (Perfil + Salas + Aulas Abertas)
   useEffect(() => {
-    async function fetchUserAndRooms() {
+    async function fetchAllData() {
       try {
-        const [perfil, roomsResponse] = await Promise.all([
+        const [perfil, roomsResponse, minhasAulas] = await Promise.all([
           perfilService.meuPerfil(),
           api.get<ChatRoom[]>('/api/chat/rooms'),
+          aulaService.listarMinhasAulas()
         ]);
+
+        setMeuId(perfil.id);
         setCurrentUser(perfil.nome);
         setRooms(roomsResponse.data);
+
+        // Filtra apenas as aulas em que o usuário logado é o AUTOR e estão ABERTAS
+        const abertas = minhasAulas.filter(a => a.status === 'ABERTA');
+        setMinhasAulasAbertas(abertas);
+
       } catch {
         setCurrentUser('Usuário');
       }
     }
-    fetchUserAndRooms();
+    fetchAllData();
   }, []);
 
-  // CORREÇÃO: quando a sala não está na lista (ex: sala recém-criada sem mensagens),
-  // busca o nome do contato no endpoint /info em vez de mostrar "Novo Contato".
   useEffect(() => {
-    if (!roomId) {
-      setActiveRoom(null);
-      return;
-    }
-
-    const found = rooms.find(r => r.id === roomId);
-    if (found) {
-      setActiveRoom(found);
-      return;
-    }
-
-    // Se veio com nome via navigation state, usa imediatamente enquanto carrega
-    if (nomeContatoNovo) {
-      setActiveRoom({
-        id: roomId,
-        name: nomeContatoNovo,
-        lastMessage: 'Envie uma mensagem para começar.',
-        time: '',
-      });
-    }
-
-    // Busca o nome oficial no backend (funciona mesmo após F5)
-    api.get<{ name: string }>(`/api/chat/${roomId}/info`)
-      .then(res => {
+    if (roomId) {
+      const found = rooms.find(r => r.id === roomId);
+      if (found) {
+        setActiveRoom(found);
+      } else {
         setActiveRoom({
           id: roomId,
-          name: res.data.name,
-          lastMessage: 'Envie uma mensagem para começar.',
-          time: '',
+          name: nomeContatoNovo,
+          lastMessage: "Envie uma mensagem para começar.",
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         });
-      })
-      .catch(() => {
-        // Mantém o nome do state se a requisição falhar
-        if (!nomeContatoNovo) {
-          setActiveRoom({
-            id: roomId,
-            name: 'Usuário',
-            lastMessage: '',
-            time: '',
-          });
-        }
-      });
+      }
+    } else {
+      setActiveRoom(null);
+    }
   }, [roomId, rooms, nomeContatoNovo]);
 
   useEffect(() => {
     if (!roomId) return;
-
     loadHistory(roomId);
     const client = connectWebSocket(roomId);
-
     return () => {
       client.deactivate();
     };
@@ -138,7 +123,6 @@ const Chat: React.FC = () => {
       onConnect: () => {
         stompClientRef.current = client;
         client.subscribe(`/topic/chat/${id}`, (message) => {
-          // CORREÇÃO: o backend agora retorna MessageEntity (com id e timestamp corretos)
           const received: MessageEntity = JSON.parse(message.body);
           setMessages(prev => [...prev, received]);
         });
@@ -169,6 +153,34 @@ const Chat: React.FC = () => {
     setNewMessage('');
   }
 
+  // ── MÁGICA: Função para aceitar o acordo ──
+  async function handleAceitarAcordo() {
+      if (!roomId || !meuId || minhasAulasAbertas.length === 0) return;
+
+      // O RoomId é idA_idB. Tiramos o nosso ID para sobrar apenas o ID do interessado.
+      const partes = roomId.split('_');
+      const interessadoId = partes.find(id => id !== meuId);
+
+      if (!interessadoId) return;
+
+      // Pega o primeiro anúncio aberto do usuário (se ele tiver mais de um, simplificamos pegando o mais antigo/primeiro)
+      const aulaPendente = minhasAulasAbertas[0];
+
+      const confirmar = window.confirm(`Deseja fechar o acordo com ${activeRoom?.name} para o seu anúncio? Ele será movido para suas aulas confirmadas.`);
+      if (!confirmar) return;
+
+      try {
+          await aulaService.aceitarAula(aulaPendente.id, interessadoId);
+          alert('Acordo fechado com sucesso! A aula agora está Confirmada.');
+
+          // Remove a aula da lista de abertas para o botão sumir automaticamente
+          setMinhasAulasAbertas(prev => prev.filter(a => a.id !== aulaPendente.id));
+      } catch (error) {
+          console.error("Erro ao fechar acordo", error);
+          alert("Erro ao aceitar o usuário. Tente novamente.");
+      }
+  }
+
   const filteredRooms = rooms.filter(r =>
     r.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -181,7 +193,6 @@ const Chat: React.FC = () => {
 
         <div className="chat-container" style={{ flex: 1, margin: 0, borderRadius: 0, border: 'none', maxWidth: '100%' }}>
 
-          {/* SIDEBAR DE CONVERSAS */}
           <div className="chat-sidebar">
             <div className="sidebar-header">
               <h2>Mensagens</h2>
@@ -223,16 +234,31 @@ const Chat: React.FC = () => {
             </div>
           </div>
 
-          {/* JANELA DE MENSAGENS */}
           {activeRoom ? (
             <div className="chat-window">
-              <div className="chat-header">
+              <div className="chat-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+
                 <div className="active-user-info">
                   <div className="avatar small">{activeRoom.name.charAt(0)}</div>
                   <div className="user-status">
                     <h3>{activeRoom.name}</h3>
                   </div>
                 </div>
+
+                {/* O BOTÃO SÓ APARECE SE O USUÁRIO LOGADO TIVER UM ANÚNCIO ABERTO */}
+                {minhasAulasAbertas.length > 0 && (
+                    <button
+                        onClick={handleAceitarAcordo}
+                        style={{
+                            background: '#10B981', color: '#FFF', border: 'none', padding: '10px 20px',
+                            borderRadius: '8px', fontWeight: 700, cursor: 'pointer', fontSize: '13px',
+                            boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.2)'
+                        }}
+                    >
+                        ✅ Fechar Acordo
+                    </button>
+                )}
+
               </div>
 
               <div className="messages-area">
@@ -263,13 +289,7 @@ const Chat: React.FC = () => {
                   />
                   <button type="submit" className="btn-send">
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
+                      <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </button>
                 </div>

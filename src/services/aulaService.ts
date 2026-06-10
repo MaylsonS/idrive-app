@@ -7,16 +7,6 @@ export interface AulaRequestDTO {
   descricao?: string;
 }
 
-export interface AulaResponseDTO {
-  id: string;
-  inicio: string;
-  fim: string;
-  valor: number;
-  descricao?: string;
-  autor: string;
-  coAutor?: string;
-  status: 'ABERTA' | 'ACEITA' | 'CONCLUIDA' | 'CANCELADA';
-}
 
 export interface AulaResponseDTO {
   id: string;
@@ -25,10 +15,11 @@ export interface AulaResponseDTO {
   valor: number;
   descricao?: string;
   autor: string;
-  autorId: string; // <-- (Lembrando que esse já tava no Java e é usado no botão Ver Perfil)
+  autorId?: string;
+  notaAutor?: number;
   coAutor?: string;
+  coAutorId?: string;
   status: 'ABERTA' | 'ACEITA' | 'CONCLUIDA' | 'CANCELADA';
-  notaAutor?: number;  // <--- ADICIONE ESTA LINHA!
 }
 
 export const aulaService = {
@@ -52,10 +43,10 @@ export const aulaService = {
     return response.data;
   },
 
-   aceitarAula: async (id: string): Promise<AulaResponseDTO> => {
-    const response = await api.put(`/aulas/${id}/aceitar`);
+  aceitarAula: async (id: string, interessadoId: string): Promise<AulaResponseDTO> => {
+    const response = await api.put(`/aulas/${id}/aceitar/${interessadoId}`);
     return response.data;
-},
+  },
 
   editarAnuncio: async (id: string, dados: AulaRequestDTO): Promise<AulaResponseDTO> => {
     const response = await api.put(`/aulas/editar-anuncio/${id}`, dados);

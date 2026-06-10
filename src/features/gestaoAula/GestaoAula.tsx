@@ -64,10 +64,8 @@ function AulaCard({ aula, onCancelar, loading, tipoPerfil }: CardProps) {
   const isInstrutor = tipoPerfil === 'INSTRUTOR';
   const nomeExibicao = aula.coAutor ? (isInstrutor ? aula.coAutor : aula.autor) : aula.autor;
 
-  const podeCancelarConfirmada = (() => {
-    const diff = new Date(aula.inicio).getTime() - Date.now();
-    return diff > 24 * 60 * 60 * 1000;
-  })();
+  // A MÁGICA ACONTECE AQUI: A regra das 24 horas foi removida.
+  // Se a aula está ACEITA, o botão de cancelar fica sempre disponível.
 
   return (
     <div className={`aula-card ${isConfirmada ? 'confirmada' : ''} ${isCancelada ? 'cancelada' : ''}`}>
@@ -101,24 +99,13 @@ function AulaCard({ aula, onCancelar, loading, tipoPerfil }: CardProps) {
 
           <div className="card-acoes">
             {isConfirmada && (
-              <>
-                {podeCancelarConfirmada ? (
-                  <button
-                    onClick={() => onCancelar(aula.id)}
-                    disabled={loading}
-                    className="btn-card btn-cancelar"
-                  >
-                    Cancelar Aula
-                  </button>
-                ) : (
-                  <button disabled className="btn-card btn-indisponivel">
-                    <svg width="9" height="12" viewBox="0 0 9 12" fill="none">
-                      <path d="M7.5 5H7V3.5C7 1.57 5.43 0 3.5 0C1.57 0 0 1.57 0 3.5V5H-0.5C-0.78 5 -1 5.22 -1 5.5V11.5C-1 11.78 -0.78 12 -0.5 12H7.5C7.78 12 8 11.78 8 11.5V5.5C8 5.22 7.78 5 7.5 5ZM3.5 9C2.95 9 2.5 8.55 2.5 8C2.5 7.45 2.95 7 3.5 7C4.05 7 4.5 7.45 4.5 8C4.5 8.55 4.05 9 3.5 9ZM5.5 5H1.5V3.5C1.5 2.4 2.4 1.5 3.5 1.5C4.6 1.5 5.5 2.4 5.5 3.5V5Z" fill="rgba(89,92,94,0.4)"/>
-                    </svg>
-                    Cancelamento Indisponível (Menos de 24h)
-                  </button>
-                )}
-              </>
+              <button
+                onClick={() => onCancelar(aula.id)}
+                disabled={loading}
+                className="btn-card btn-cancelar"
+              >
+                Cancelar Aula
+              </button>
             )}
           </div>
         </div>
