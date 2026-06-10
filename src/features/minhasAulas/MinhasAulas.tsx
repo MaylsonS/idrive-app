@@ -48,14 +48,14 @@ export default function MinhasAulas() {
     }, []);
 
     // Particionamento por status
-    const proximas  = aulas.filter(a => a.status === 'ACEITA');
+    const proximas   = aulas.filter(a => a.status === 'ACEITA');
     const concluidas = aulas.filter(a => a.status === 'CONCLUIDA');
 
     // ── Cálculo de progresso DETRAN ──
-    const minutosReais     = concluidas.reduce((acc, a) => acc + duracaoMinutos(a.inicio, a.fim), 0);
-    const horasAula        = minutosReais / MINUTOS_POR_HORA_AULA;          // em horas-aula DETRAN
-    const percentual       = Math.min((horasAula / TOTAL_HORAS_AULA_DETRAN) * 100, 100);
-    const faltantes        = Math.max(0, TOTAL_HORAS_AULA_DETRAN - Math.floor(horasAula));
+    const minutosReais = concluidas.reduce((acc, a) => acc + duracaoMinutos(a.inicio, a.fim), 0);
+    const horasAula    = minutosReais / MINUTOS_POR_HORA_AULA;
+    const percentual   = Math.min((horasAula / TOTAL_HORAS_AULA_DETRAN) * 100, 100);
+    const faltantes    = Math.max(0, TOTAL_HORAS_AULA_DETRAN - Math.floor(horasAula));
 
     const isInstrutor = tipoPerfil === 'INSTRUTOR';
 
@@ -162,8 +162,11 @@ export default function MinhasAulas() {
                                 {concluidas.length === 0 && (
                                     <p className="ma-vazio">Nenhuma aula concluída ainda.</p>
                                 )}
-                                {concluidas.map((a, i) => {
-                                    const jaAvaliada = i % 2 !== 0; // mock visual — substituir por campo real
+                                {concluidas.map((a) => {
+                                    const jaAvaliada = isInstrutor
+                                        ? a.avaliadoPeloInstrutor
+                                        : a.avaliadoPeloAluno;
+
                                     return (
                                         <div
                                             key={a.id}
@@ -185,18 +188,18 @@ export default function MinhasAulas() {
                                             </div>
                                             {jaAvaliada ? (
                                                 <div className="estrelas">
-                                                    {[1,2,3,4].map(n => (
+                                                    {[1, 2, 3, 4].map(n => (
                                                         <span key={n} className="estrela-on">★</span>
                                                     ))}
                                                     <span className="estrela-off">★</span>
                                                 </div>
                                             ) : (
                                                 <button
-                                            className="btn-avaliar"
-                                            onClick={() => navigate(`/avaliar/${a.id}`)}
-                                        >
-                                            AVALIAR AULA
-                                        </button>
+                                                    className="btn-avaliar"
+                                                    onClick={() => navigate(`/avaliar/${a.id}`)}
+                                                >
+                                                    AVALIAR AULA
+                                                </button>
                                             )}
                                         </div>
                                     );

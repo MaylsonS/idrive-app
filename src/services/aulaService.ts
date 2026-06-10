@@ -7,19 +7,19 @@ export interface AulaRequestDTO {
   descricao?: string;
 }
 
-
 export interface AulaResponseDTO {
   id: string;
   inicio: string;
   fim: string;
   valor: number;
-  descricao?: string;
+  descricao: string;
   autor: string;
-  autorId?: string;
-  notaAutor?: number;
-  coAutor?: string;
-  coAutorId?: string;
+  autorId: string;
+  coAutor: string;
+  coAutorId: string;
   status: 'ABERTA' | 'ACEITA' | 'CONCLUIDA' | 'CANCELADA';
+  avaliadoPeloAluno: boolean;
+  avaliadoPeloInstrutor: boolean;
 }
 
 export const aulaService = {

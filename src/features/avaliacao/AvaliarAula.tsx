@@ -8,7 +8,7 @@ import { useAuthContext } from '../../contexts/AuthContext';
 import './AvaliarAula.css';
 
 // ── Critérios por perfil ───────────────────────────────────────────────────
-const CRITsERIOS_INSTRUTOR = [
+const CRITERIOS_INSTRUTOR   = [
   {
     key: 'pontualidade',
     icon: <Clock size={20} />,
@@ -117,7 +117,7 @@ export default function AvaliarAula() {
   const [reportar, setReportar] = useState('');
 
   const isAluno = tipoPerfil === 'ALUNO';
-  const criterios = isAluno ? CRITERIOS_INSTRUTOR : CRITERIOS_ALUNO;
+  const criterios = isAluno ? CRITERIOS_INSTRUTOR  : CRITERIOS_ALUNO;
 
   // Calcula nota geral automaticamente pela média dos critérios
   useEffect(() => {
