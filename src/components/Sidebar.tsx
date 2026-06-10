@@ -36,21 +36,21 @@ export function Sidebar({ itemAtivo }: SidebarProps) {
                     <Compass size={20} /> <span>Explorar Anúncios</span>
                 </Link>
 
-
                 {tipoPerfil === 'INSTRUTOR' && (
                     <Link to="/dashboard" className={`nav-item ${itemAtivo === 'INICIO' ? 'ativo' : ''}`}>
                         <ChartNoAxesCombined size={20} /> <span>Dashboard</span>
                     </Link>
                 )}
+
                 <Link to="/minhas-aulas" className={`nav-item ${itemAtivo === 'AULAS' ? 'ativo' : ''}`}>
                     <Calendar size={20} />
                     <span>{tipoPerfil === 'INSTRUTOR' ? 'Gerenciar Horários' : 'Minhas Aulas'}</span>
                 </Link>
 
-                <Link to="#" className={`nav-item ${itemAtivo === 'CHAT' ? 'ativo' : ''}`}>
+                {/* A MÁGICA FOI AQUI: Mudamos de "#" para "/chat" */}
+                <Link to="/chat" className={`nav-item ${itemAtivo === 'CHAT' ? 'ativo' : ''}`}>
                     <MessageSquare size={20} /> <span>Chat</span>
                 </Link>
-
 
                 <Link to="/gestao-aula" className={`nav-item ${itemAtivo === 'SOLICITACOES' ? 'ativo' : ''}`}>
                     <Bell size={20} /> <span>Gestão de Aulas</span>

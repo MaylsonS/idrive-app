@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../components/Sidebar';
 import { aulaService, type AulaResponseDTO } from '../../services/aulaService';
 import { useAuthContext } from '../../contexts/AuthContext';
-import './GestaoAulas.css';
+import './GestaoAula.css';
 
 // ── Helpers ─────────────────────────────────────────────────
 function formatarData(iso: string) {

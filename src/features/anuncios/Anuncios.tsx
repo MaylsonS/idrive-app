@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../components/Sidebar';
 import { aulaService, type AulaResponseDTO } from '../../services/aulaService';
 import { perfilService } from '../../services/perfilService';
+import { chatService } from '../../services/chatService';
 import { useAuthContext } from '../../contexts/AuthContext';
 import './Anuncios.css';
 
@@ -21,7 +22,6 @@ export default function Anuncios() {
     const { tipoPerfil } = useAuthContext();
 
     useEffect(() => {
-        // Busca o id do usuário logado uma única vez via /perfil/me
         perfilService.meuPerfil().then(p => setMeuId(p.id));
     }, []);
 
@@ -135,10 +135,21 @@ function CardAnuncio({
         ? anuncio.descricao.split(' ').slice(0, 3).join(' ') + '...'
         : isInstrutor ? 'Buscando instrutor' : 'Manual & Auto';
 
-    function handleAgendar() {
-        if (!meuId || !anuncio.autorId) return;
-        const roomId = gerarRoomId(meuId, anuncio.autorId.toString());
-        navigate(`/chat/${roomId}`);
+    async function handleAgendar() {
+        if (!meuId || !anuncio.autorId) {
+            alert("Não foi possível identificar os usuários para iniciar a conversa.");
+            return;
+        }
+
+        try {
+            const roomIdOficial = await chatService.iniciarConversa(anuncio.autorId.toString());
+
+            // A MÁGICA ESTÁ AQUI: Passamos o nome do autor como state na navegação!
+            navigate(`/chat/${roomIdOficial}`, { state: { nomeContato: anuncio.autor } });
+        } catch (error) {
+            console.error("Erro ao iniciar conversa:", error);
+            alert("Erro ao abrir o chat com o anunciante.");
+        }
     }
 
     return (
@@ -154,12 +165,9 @@ function CardAnuncio({
                     <h3 className="card-nome">{anuncio.autor}</h3>
                     <div className="card-rating">
                         <span className="estrela">★</span>
-
-                        {/* A MÁGICA ACONTECE AQUI: Nota Real */}
                         <span className="nota">
                             {anuncio.notaAutor ? anuncio.notaAutor.toFixed(1) : '--'}
                         </span>
-
                         <span className="avaliacoes"></span>
                     </div>
                     <span className="card-tag">{especialidade.toUpperCase()}</span>
@@ -190,6 +198,7 @@ function CardAnuncio({
                         onClick={handleAgendar}
                         disabled={!meuId}
                     >
+
                         {isInstrutor ? 'Aceitar' : 'Agendar'}<br />Aula
                     </button>
                 </div>
