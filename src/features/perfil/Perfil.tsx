@@ -1,88 +1,53 @@
 import { useState, useEffect } from 'react';
 import { Sidebar } from '../../components/Sidebar';
-import { Edit2, Mail, Phone, FileText, Star, AlertCircle } from 'lucide-react';
+import { Edit2, Mail, Phone, FileText, Star } from 'lucide-react';
 import { perfilService } from '../../services/perfilService';
+import { aulaService } from '../../services/aulaService';
 import type { PerfilPublicoDTO } from '../../services/perfilService';
+import type { AulaResponseDTO } from '../../services/aulaService';
 import './Perfil.css';
 
-function PerfilSkeleton() {
-  return (
-    <div className="perfil-wrapper">
-      <header className="header-perfil-top">
-        <div className="header-titulos">
-          <div className="skeleton skeleton-title" />
-          <div className="skeleton skeleton-subtitle" />
-        </div>
-      </header>
-      <div className="perfil-bento-grid">
-        <aside className="card-base card-perfil-lateral">
-          <div className="avatar-wrapper">
-            <div className="skeleton skeleton-avatar" />
-          </div>
-          <div className="skeleton skeleton-nome" />
-          <div className="skeleton skeleton-role" />
-          <div className="divisor-perfil" />
-          <div className="perfil-contatos">
-            <div className="skeleton skeleton-contato" />
-            <div className="skeleton skeleton-contato" />
-          </div>
-        </aside>
-        <div className="coluna-direita">
-          <div className="direita-topo">
-            <div className="card-base card-progresso skeleton-card" />
-            <div className="card-base card-documentos skeleton-card" />
-          </div>
-          <div className="card-base card-historico skeleton-card" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Error ────────────────────────────────────────────────────────────────────
-
-function PerfilError({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return (
-    <div className="perfil-error-state">
-      <AlertCircle size={32} className="error-icon" />
-      <h3>Não foi possível carregar o perfil</h3>
-      <p>{message}</p>
-      <button className="btn-editar-perfil" onClick={onRetry}>
-        Tentar novamente
-      </button>
-    </div>
-  );
-}
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function getRoleText(tipoPerfil: string): string {
-  return tipoPerfil === 'ALUNO' ? 'Aluno IDrive • Categoria B' : 'Instrutor IDrive';
+  return tipoPerfil === 'ALUNO' ? 'Aluno IDrive' : 'Instrutor IDrive';
 }
 
 function getInitials(nome: string): string {
-  return nome
-    .split(' ')
-    .slice(0, 2)
-    .map(n => n[0])
-    .join('')
-    .toUpperCase();
+  if (!nome) return 'ID';
+  return nome.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
+}
+
+function formatarData(iso: string) {
+  return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).replace('.', '');
 }
 
 // ─── Componente Principal ─────────────────────────────────────────────────────
 
 export default function Perfil() {
   const [perfil, setPerfil] = useState<PerfilPublicoDTO | null>(null);
+  const [historico, setHistorico] = useState<AulaResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function carregarPerfil() {
+  async function carregarDados() {
     setLoading(true);
     setError(null);
 
     try {
-      const data = await perfilService.meuPerfil();
-      setPerfil(data);
+      const [dadosPerfil, minhasAulas] = await Promise.all([
+        perfilService.meuPerfil(),
+        aulaService.listarMinhasAulas()
+      ]);
+
+      setPerfil(dadosPerfil);
+
+      const aulasConcluidas = minhasAulas
+        .filter(a => a.status === 'CONCLUIDA')
+        .sort((a, b) => new Date(b.fim).getTime() - new Date(a.fim).getTime())
+        .slice(0, 3);
+
+      setHistorico(aulasConcluidas);
+
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Erro ao carregar perfil.';
       setError(message);
@@ -92,7 +57,7 @@ export default function Perfil() {
   }
 
   useEffect(() => {
-    carregarPerfil();
+    carregarDados();
   }, []);
 
   return (
@@ -101,10 +66,20 @@ export default function Perfil() {
 
       <main className="conteudo-perfil">
 
-        {loading && <PerfilSkeleton />}
+        {loading && (
+          <div style={{ padding: '40px', color: '#595C5E', fontSize: '14px' }}>
+            Carregando perfil...
+          </div>
+        )}
 
         {error && !loading && (
-          <PerfilError message={error} onRetry={carregarPerfil} />
+          <div style={{ padding: '40px', color: '#991B1B', fontSize: '14px' }}>
+            {error}
+            <br /><br />
+            <button onClick={carregarDados} className="btn-editar-perfil" style={{ width: 'auto' }}>
+              Tentar novamente
+            </button>
+          </div>
         )}
 
         {perfil && !loading && (
@@ -155,16 +130,16 @@ export default function Perfil() {
                   <div className="contato-item">
                     <div className="contato-icone"><Mail size={16} /></div>
                     <div className="contato-textos">
-                      <span className="contato-label">TIPO</span>
-                      <span className="contato-valor">{perfil.tipoPerfil}</span>
+                      <span className="contato-label">E-MAIL</span>
+                      <span className="contato-valor">{perfil.email || 'Não informado'}</span>
                     </div>
                   </div>
 
                   <div className="contato-item">
                     <div className="contato-icone"><Phone size={16} /></div>
                     <div className="contato-textos">
-                      <span className="contato-label">AULAS CONCLUÍDAS</span>
-                      <span className="contato-valor">{perfil.totalAulas}</span>
+                      <span className="contato-label">TELEFONE</span>
+                      <span className="contato-valor">{perfil.telefone || 'Não informado'}</span>
                     </div>
                   </div>
                 </div>
@@ -173,9 +148,7 @@ export default function Perfil() {
               {/* COLUNA DIREITA */}
               <div className="coluna-direita">
 
-                {/* LINHA DE CIMA: PROGRESSO E DOCUMENTOS */}
                 <div className="direita-topo">
-
                   {/* PROGRESS CARD */}
                   <div className="card-base card-progresso">
                     <div>
@@ -205,71 +178,66 @@ export default function Perfil() {
                   {/* DOCUMENTS STATUS */}
                   <div className="card-base card-documentos">
                     <p className="eyebrow-title doc-eyebrow">MEUS DOCUMENTOS</p>
-
                     <div className="lista-documentos">
                       <div className="doc-item">
                         <div className="doc-info">
                           <FileText size={18} className="doc-icone" />
                           <span className="doc-nome">RG / CPF</span>
                         </div>
-                        <span className="badge-verificado">VERIFICADO</span>
+                        <span className="badge-pendente">EM DESENVOLVIMENTO</span>
                       </div>
-
                       <div className="doc-item">
                         <div className="doc-info">
                           <FileText size={18} className="doc-icone" />
                           <span className="doc-nome">Residência</span>
                         </div>
-                        <span className="badge-verificado">VERIFICADO</span>
+                        <span className="badge-pendente">EM DESENVOLVIMENTO</span>
                       </div>
-
                       <div className="doc-item">
                         <div className="doc-info">
                           <FileText size={18} className="doc-icone" />
                           <span className="doc-nome">Exame Médico</span>
                         </div>
-                        <span className="badge-pendente">PENDENTE</span>
+                        <span className="badge-pendente">EM DESENVOLVIMENTO</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* LINHA DE BAIXO: RECENT HISTORY */}
+                {/* LINHA DE BAIXO: HISTÓRICO REAL */}
                 <div className="card-base card-historico">
                   <div className="historico-header">
                     <p className="eyebrow-title doc-eyebrow" style={{ margin: 0 }}>
                       HISTÓRICO RECENTE
                     </p>
-                    <a href="#" className="link-ver-todos">Ver todos</a>
+                    <a href="/minhas-aulas" className="link-ver-todos">Ver todas</a>
                   </div>
 
                   <div className="lista-historico">
-                    <div className="historico-item">
-                      <div className="hist-info">
-                        <div className="hist-avatar hist-avatar-initials">CM</div>
-                        <div className="hist-textos">
-                          <h4>Aula Prática #{perfil.totalAulas}</h4>
-                          <p>Instrutora Carla Mendes • Ontem, 14:00</p>
-                        </div>
-                      </div>
-                      <div className="hist-nota">
-                        <Star size={12} fill="#F97316" stroke="none" /> 5.0
-                      </div>
-                    </div>
-
-                    {perfil.totalAulas > 1 && (
-                      <div className="historico-item">
-                        <div className="hist-info">
-                          <div className="hist-avatar hist-avatar-initials">RA</div>
-                          <div className="hist-textos">
-                            <h4>Aula Prática #{perfil.totalAulas - 1}</h4>
-                            <p>Instrutor Ricardo Alves • 12 Out, 09:00</p>
+                    {historico.length === 0 ? (
+                      <p style={{ fontSize: '14px', color: '#666' }}>Nenhuma aula concluída ainda.</p>
+                    ) : (
+                      historico.map((aula, index) => {
+                        const nomeOutro = aula.coAutor || aula.autor;
+                        return (
+                          <div key={aula.id} className="historico-item">
+                            <div className="hist-info">
+                              <div className="hist-avatar hist-avatar-initials">
+                                {getInitials(nomeOutro)}
+                              </div>
+                              <div className="hist-textos">
+                                <h4>{aula.descricao || `Aula Prática #${perfil.totalAulas - index}`}</h4>
+                                <p>{nomeOutro} • {formatarData(aula.fim)}</p>
+                              </div>
+                            </div>
+                            <div className="hist-nota">
+                              <span style={{ fontSize: '11px', fontWeight: 700, color: '#166534', background: '#DCFCE7', padding: '2px 6px', borderRadius: '4px' }}>
+                                CONCLUÍDA
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                        <div className="hist-nota">
-                          <Star size={12} fill="#F97316" stroke="none" /> 4.8
-                        </div>
-                      </div>
+                        );
+                      })
                     )}
                   </div>
                 </div>

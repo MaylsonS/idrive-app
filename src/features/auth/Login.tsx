@@ -26,7 +26,7 @@ export default function Login() {
             const resposta = await authService.login({ email, senha });
             const perfil = decodificarPerfil(resposta.token);
             storeToken(resposta.token, perfil);
-            navigate('/dashboard');
+            navigate('/anuncios');
         } catch (error) {
             console.error("Erro ao fazer login:", error);
             alert("E-mail ou senha incorretos.");

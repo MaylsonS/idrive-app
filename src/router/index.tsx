@@ -12,6 +12,7 @@ const MinhasAulas = lazy(() => import("../features/minhasAulas/MinhasAulas"));
 const AvaliarAula  = lazy(() => import("../features/avaliacao/AvaliarAula"));
 const Chat = lazy(() => import("../features/chat/Chat"));
 const PerfilPublico = lazy(() => import("../features/perfil/PerfilPublico"));
+const GestaoAula = lazy(() => import("../features/gestaoAula/GestaoAula"));
 export const router = createBrowserRouter([
     {
         path: "/",
@@ -62,4 +63,10 @@ export const router = createBrowserRouter([
         path: "/avaliar/:aulaId",
         element: <PrivateRoute><AvaliarAula /></PrivateRoute>,
     },
+    {
+        path: "/gestao-aula",
+        element: <PrivateRoute><GestaoAula /></PrivateRoute>,
+    },
+
+
 ]);

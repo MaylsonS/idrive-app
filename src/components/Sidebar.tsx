@@ -36,10 +36,12 @@ export function Sidebar({ itemAtivo }: SidebarProps) {
                     <Compass size={20} /> <span>Explorar Anúncios</span>
                 </Link>
 
-                <Link to="/dashboard" className={`nav-item ${itemAtivo === 'INICIO' ? 'ativo' : ''}`}>
-                    <ChartNoAxesCombined size={20} /> <span>Dashboard</span>
-                </Link>
 
+                {tipoPerfil === 'INSTRUTOR' && (
+                    <Link to="/dashboard" className={`nav-item ${itemAtivo === 'INICIO' ? 'ativo' : ''}`}>
+                        <ChartNoAxesCombined size={20} /> <span>Dashboard</span>
+                    </Link>
+                )}
                 <Link to="/minhas-aulas" className={`nav-item ${itemAtivo === 'AULAS' ? 'ativo' : ''}`}>
                     <Calendar size={20} />
                     <span>{tipoPerfil === 'INSTRUTOR' ? 'Gerenciar Horários' : 'Minhas Aulas'}</span>
@@ -49,19 +51,15 @@ export function Sidebar({ itemAtivo }: SidebarProps) {
                     <MessageSquare size={20} /> <span>Chat</span>
                 </Link>
 
-                {tipoPerfil === 'INSTRUTOR' && (
-                    <Link to="/solicitacoes" className={`nav-item ${itemAtivo === 'SOLICITACOES' ? 'ativo' : ''}`}>
-                        <Bell size={20} /> <span>Solicitações</span>
-                    </Link>
-                )}
+
+                <Link to="/gestao-aula" className={`nav-item ${itemAtivo === 'SOLICITACOES' ? 'ativo' : ''}`}>
+                    <Bell size={20} /> <span>Gestão de Aulas</span>
+                </Link>
 
                 <Link to="/perfil" className={`nav-item ${itemAtivo === 'PERFIL' ? 'ativo' : ''}`}>
                     <User size={20} /> <span>Perfil</span>
                 </Link>
 
-                <Link to="/#" className={`nav-item ${itemAtivo === 'CONFIGURACAO' ? 'ativo' : ''}`}>
-                    <Settings size={20} /> <span>Configurações</span>
-                </Link>
             </nav>
 
             <div className="sidebar-footer">

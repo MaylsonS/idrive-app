@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Sidebar } from '../../components/Sidebar';
 import { aulaService } from '../../services/aulaService';
+import { perfilService } from '../../services/perfilService';
 import type { AulaRequestDTO, AulaResponseDTO } from '../../services/aulaService';
 import { useAuthContext } from '../../contexts/AuthContext';
 import './GerenciarAulas.css';
@@ -16,7 +17,7 @@ function formatarHora(iso: string) {
 export default function GerenciarAulas() {
     const { tipoPerfil } = useAuthContext();
 
-    // Form state
+    // ── ESTADOS DO FORMULÁRIO ──
     const [data, setData] = useState('');
     const [horaInicio, setHoraInicio] = useState('');
     const [horaFim, setHoraFim] = useState('');
@@ -24,16 +25,19 @@ export default function GerenciarAulas() {
     const [descricao, setDescricao] = useState('');
     const [enviando, setEnviando] = useState(false);
 
-    // Anúncios ativos — buscados do back
+    // NOVO: Estado para saber se estamos editando (guarda o ID da aula)
+    const [editandoId, setEditandoId] = useState<string | null>(null);
+
+    // ── ESTADOS DOS DADOS ──
     const [anunciosAtivos, setAnunciosAtivos] = useState<AulaResponseDTO[]>([]);
     const [loadingAtivos, setLoadingAtivos] = useState(true);
-
-    // Histórico — todos os meus anúncios
     const [historico, setHistorico] = useState<AulaResponseDTO[]>([]);
     const [loadingHistorico, setLoadingHistorico] = useState(true);
 
+    // NOVO: Estado para a nota média
+    const [notaMedia, setNotaMedia] = useState<number | null>(null);
+
     function carregarDados() {
-        // Anúncios ativos = minhas aulas com status ABERTA
         aulaService.listarMinhasAulas()
             .then(data => {
                 setAnunciosAtivos(data.filter(a => a.status === 'ABERTA'));
@@ -48,49 +52,102 @@ export default function GerenciarAulas() {
 
     useEffect(() => {
         carregarDados();
+        // Busca a nota média assim que a tela abre
+        perfilService.meuPerfil()
+            .then(p => setNotaMedia(p.notaMedia || null))
+            .catch(console.error);
     }, []);
 
-const handlePublicar = async (e: React.FormEvent) => {
-    e.preventDefault();
+    // ── AÇÕES ──
 
-    // ── Validação de data no front ───────────────────────────────────────
-    const dataHoraInicio = new Date(`${data}T${horaInicio}:00`);
-    const dataHoraFim    = new Date(`${data}T${horaFim}:00`);
-    const agora          = new Date();
+    const handlePublicar = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-    if (dataHoraInicio <= agora) {
-        alert('Não é possível criar um anúncio com data e hora anteriores ao momento atual.');
-        return;
-    }
+        const dataHoraInicio = new Date(`${data}T${horaInicio}:00`);
+        const dataHoraFim    = new Date(`${data}T${horaFim}:00`);
+        const agora          = new Date();
 
-    if (dataHoraFim <= dataHoraInicio) {
-        alert('O horário de término deve ser após o horário de início.');
-        return;
-    }
+        if (dataHoraInicio <= agora) {
+            alert('Não é possível criar/editar um anúncio com data e hora no passado.');
+            return;
+        }
 
-    setEnviando(true);
-    try {
-        const payload: AulaRequestDTO = {
-            inicio: `${data}T${horaInicio}:00`,
-            fim: `${data}T${horaFim}:00`,
-            valor: parseFloat(valor.replace(',', '.')),
-            descricao: descricao
-        };
-        await aulaService.criarAula(payload);
-        alert('Anúncio publicado com sucesso!');
+        if (dataHoraFim <= dataHoraInicio) {
+            alert('O horário de término deve ser após o horário de início.');
+            return;
+        }
+
+        setEnviando(true);
+        try {
+            const payload: AulaRequestDTO = {
+                inicio: `${data}T${horaInicio}:00`,
+                fim: `${data}T${horaFim}:00`,
+                valor: parseFloat(valor.replace(',', '.')),
+                descricao: descricao
+            };
+
+            // SE TIVER ID, É EDIÇÃO. SE NÃO, É CRIAÇÃO!
+            if (editandoId) {
+                await aulaService.editarAnuncio(editandoId, payload);
+                alert('Anúncio atualizado com sucesso!');
+                setEditandoId(null); // Sai do modo edição
+            } else {
+                await aulaService.criarAula(payload);
+                alert('Anúncio publicado com sucesso!');
+            }
+
+            // Limpa o formulário
+            setData(''); setHoraInicio(''); setHoraFim(''); setValor(''); setDescricao('');
+            carregarDados();
+        } catch (error) {
+            console.error('Erro ao salvar', error);
+            alert('Erro ao salvar o anúncio.');
+        } finally {
+            setEnviando(false);
+        }
+    };
+
+    // NOVO: Função de Exclusão
+    const handleExcluir = async (id: string) => {
+        const confirmar = window.confirm("Tem certeza que deseja excluir este anúncio?");
+        if (!confirmar) return;
+
+        try {
+            await aulaService.excluirAnuncio(id);
+            carregarDados(); // Recarrega a lista do zero
+        } catch (error) {
+            console.error("Erro ao excluir", error);
+            alert("Não foi possível excluir o anúncio.");
+        }
+    };
+
+    // NOVO: Prepara o formulário para edição
+    const prepararEdicao = (aula: AulaResponseDTO) => {
+        // Quebra o "2026-10-24T14:00:00" em pedaços para os inputs
+        const dataIso = aula.inicio.split('T')[0];
+        const horaIni = aula.inicio.split('T')[1].substring(0, 5);
+        const horaFimStr = aula.fim.split('T')[1].substring(0, 5);
+
+        setData(dataIso);
+        setHoraInicio(horaIni);
+        setHoraFim(horaFimStr);
+        setValor(aula.valor.toString());
+        setDescricao(aula.descricao || '');
+        setEditandoId(aula.id);
+
+        // Rola a tela para o topo suavemente para o usuário ver o form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const cancelarEdicao = () => {
+        setEditandoId(null);
         setData(''); setHoraInicio(''); setHoraFim(''); setValor(''); setDescricao('');
-        carregarDados();
-    } catch (error) {
-        console.error('Erro ao publicar', error);
-        alert('Erro ao publicar. Verifique se está logado.');
-    } finally {
-        setEnviando(false);
-    }
-};
+    };
 
+    // ── HELPERS VISUAIS ──
     function iconeStatus(status: AulaResponseDTO['status']) {
         const map = { ACEITA: '✅', CONCLUIDA: '✅', CANCELADA: '❌', ABERTA: '📅' };
-        return map[status];
+        return map[status] || '📅';
     }
 
     function tagStatus(status: AulaResponseDTO['status']) {
@@ -100,7 +157,7 @@ const handlePublicar = async (e: React.FormEvent) => {
             CONCLUIDA: { label: 'Concluída', bg: 'rgba(187,247,208,0.6)', color: '#166534' },
             CANCELADA: { label: 'Cancelada', bg: 'rgba(254,202,202,0.6)', color: '#991B1B' },
         };
-        return map[status];
+        return map[status] || map.ABERTA;
     }
 
     return (
@@ -116,14 +173,16 @@ const handlePublicar = async (e: React.FormEvent) => {
 
                 <div className="grid-dashboard">
 
-                    {/* COLUNA ESQUERDA */}
                     <div className="coluna-esquerda">
 
-                        {/* Formulário */}
+                        {/* FORMULÁRIO */}
                         <section className="card-formulario">
-                            <div className="borda-lateral-form" />
+                            <div className="borda-lateral-form" style={{ background: editandoId ? '#10B981' : '#9F3B02' }} />
                             <h3 className="titulo-secao">
-                                <span style={{ color: '#9F3B02' }}>＋</span> Novo Anúncio
+                                <span style={{ color: editandoId ? '#10B981' : '#9F3B02' }}>
+                                    {editandoId ? '✏️' : '＋'}
+                                </span>
+                                {editandoId ? 'Editar Anúncio' : 'Novo Anúncio'}
                             </h3>
 
                             <form onSubmit={handlePublicar} className="form-anuncio">
@@ -146,12 +205,12 @@ const handlePublicar = async (e: React.FormEvent) => {
                                 <div className="linha-inputs">
                                     <div className="grupo-input">
                                         <label>HORÁRIO DE INÍCIO</label>
-                                        <input type="time" min={new Date().toISOString().split('T')[0]} className="input-padrao" value={horaInicio}
+                                        <input type="time" className="input-padrao" value={horaInicio}
                                             onChange={e => setHoraInicio(e.target.value)} required />
                                     </div>
                                     <div className="grupo-input">
                                         <label>HORÁRIO DE TÉRMINO</label>
-                                        <input type="time" min={new Date().toISOString().split('T')[0]} className="input-padrao" value={horaFim}
+                                        <input type="time" className="input-padrao" value={horaFim}
                                             onChange={e => setHoraFim(e.target.value)} required />
                                     </div>
                                 </div>
@@ -173,25 +232,28 @@ const handlePublicar = async (e: React.FormEvent) => {
                                         value={descricao} onChange={e => setDescricao(e.target.value)} />
                                 </div>
 
-                                <button type="submit" className="btn-publicar" disabled={enviando}>
-                                    {enviando ? 'Publicando...' : 'Publicar Horário'}
-                                </button>
+                                <div style={{ display: 'flex', gap: '12px' }}>
+                                    <button type="submit" className="btn-publicar" disabled={enviando} style={{ flex: 1, background: editandoId ? 'linear-gradient(135deg, #059669 0%, #10B981 100%)' : '' }}>
+                                        {enviando ? 'Salvando...' : (editandoId ? 'Atualizar Anúncio' : 'Publicar Horário')}
+                                    </button>
+
+                                    {editandoId && (
+                                        <button type="button" className="btn-publicar" onClick={cancelarEdicao} style={{ flex: 1, background: '#64748B' }}>
+                                            Cancelar Edição
+                                        </button>
+                                    )}
+                                </div>
                             </form>
                         </section>
 
-                        {/* Anúncios Ativos */}
+                        {/* ANÚNCIOS ATIVOS */}
                         <section>
                             <div className="header-ativos">
-                                <h3 className="titulo-secao" style={{ marginBottom: 0 }}>
-                                    Anúncios Ativos
-                                </h3>
-                                <span className="tag-quantidade">
-                                    {anunciosAtivos.length} DISPONÍVEIS
-                                </span>
+                                <h3 className="titulo-secao" style={{ marginBottom: 0 }}>Anúncios Ativos</h3>
+                                <span className="tag-quantidade">{anunciosAtivos.length} DISPONÍVEIS</span>
                             </div>
 
                             {loadingAtivos && <p style={{ color: '#999', fontSize: '14px' }}>Carregando...</p>}
-
                             {!loadingAtivos && anunciosAtivos.length === 0 && (
                                 <p style={{ color: '#999', fontSize: '14px' }}>Nenhum anúncio aberto no momento.</p>
                             )}
@@ -199,12 +261,15 @@ const handlePublicar = async (e: React.FormEvent) => {
                             {anunciosAtivos.map(a => {
                                 const tag = tagStatus(a.status);
                                 return (
-                                    <div key={a.id} className="card-ativo">
+                                    <div key={a.id} className="card-ativo" style={{ border: editandoId === a.id ? '2px solid #10B981' : 'none' }}>
                                         <div className="card-ativo-topo">
                                             <span className="tag-status-ativo" style={{ background: tag.bg, color: tag.color }}>
                                                 {tag.label}
                                             </span>
-                                            <button className="btn-lixo" title="Cancelar anúncio">🗑</button>
+                                            <div style={{ display: 'flex', gap: '12px' }}>
+                                                <button className="btn-lixo" title="Editar anúncio" onClick={() => prepararEdicao(a)}>✏️</button>
+                                                <button className="btn-lixo" title="Cancelar anúncio" onClick={() => handleExcluir(a.id)}>🗑</button>
+                                            </div>
                                         </div>
                                         <div className="info-ativo">
                                             <h4>{formatarDataExtenso(a.inicio)}</h4>
@@ -221,10 +286,8 @@ const handlePublicar = async (e: React.FormEvent) => {
 
                     </div>
 
-                    {/* COLUNA DIREITA */}
                     <aside className="coluna-direita">
-
-                        {/* Nota média — dado real do back quando disponível */}
+                        {/* NOTA MÉDIA REAL */}
                         <div className="card-nota-media">
                             <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                 Avaliação Média
@@ -232,13 +295,12 @@ const handlePublicar = async (e: React.FormEvent) => {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
                                 <span style={{ color: '#E16B34', fontSize: '20px' }}>★</span>
                                 <span style={{ fontWeight: 800, fontSize: '24px', color: '#2C2F31' }}>
-                                    {/* TODO: buscar notaMedia do perfil do usuário logado */}
-                                    --/5
+                                    {notaMedia ? notaMedia.toFixed(1) : '--'}/5
                                 </span>
                             </div>
                         </div>
 
-                        {/* Histórico */}
+                        {/* HISTÓRICO */}
                         <div className="historico-titulo">
                             <span style={{ fontSize: '16px' }}>🕐</span>
                             <h3 className="titulo-secao" style={{ marginBottom: 0, fontSize: '18px' }}>
@@ -246,11 +308,8 @@ const handlePublicar = async (e: React.FormEvent) => {
                             </h3>
                         </div>
 
-                        {loadingHistorico && <p style={{ color: '#999', fontSize: '14px', padding: '0 0 12px' }}>Carregando...</p>}
-
-                        {!loadingHistorico && historico.length === 0 && (
-                            <p style={{ color: '#999', fontSize: '14px', padding: '0 0 12px' }}>Sem histórico ainda.</p>
-                        )}
+                        {loadingHistorico && <p style={{ color: '#999', fontSize: '14px' }}>Carregando...</p>}
+                        {!loadingHistorico && historico.length === 0 && <p style={{ color: '#999', fontSize: '14px' }}>Sem histórico ainda.</p>}
 
                         {historico.map(a => (
                             <div key={a.id} className="item-historico">
@@ -265,12 +324,7 @@ const handlePublicar = async (e: React.FormEvent) => {
                                 </div>
                             </div>
                         ))}
-
-                        <button className="btn-ver-historico">
-                            Ver histórico completo →
-                        </button>
                     </aside>
-
                 </div>
             </main>
         </div>

@@ -154,10 +154,13 @@ function CardAnuncio({
                     <h3 className="card-nome">{anuncio.autor}</h3>
                     <div className="card-rating">
                         <span className="estrela">★</span>
+
+                        {/* A MÁGICA ACONTECE AQUI: Nota Real */}
                         <span className="nota">
-                            {(4.5 + Math.random() * 0.5).toFixed(1)}
+                            {anuncio.notaAutor ? anuncio.notaAutor.toFixed(1) : '--'}
                         </span>
-                        <span className="avaliacoes">(--)</span>
+
+                        <span className="avaliacoes"></span>
                     </div>
                     <span className="card-tag">{especialidade.toUpperCase()}</span>
                 </div>
