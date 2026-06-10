@@ -21,7 +21,7 @@ export default function Dashboard() {
         <div className="layout-app">
             <Sidebar itemAtivo="INICIO" />
 
-            {/* Aqui entra a classe com o margin-left de 260px */}
+            
             <main className="conteudo-principal">
 
                 <header className="header-dashboard">
@@ -41,7 +41,6 @@ export default function Dashboard() {
                     <div className="dash-card-resumo">
                         <h3 className="dash-card-titulo">Resumo de Desempenho</h3>
                         <p className="dash-card-texto">
-                            (Coloque os seus cards de métricas, gráficos e tabelas aqui dentro)
                         </p>
                     </div>
 

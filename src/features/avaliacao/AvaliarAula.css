@@ -1,10 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap');
 
 .av-main {
-    margin-left: 256px;
+    flex: 1;
     padding: 96px 48px 52px 48px;
-    background: #F5F7F9;
-    min-height: 100vh;
     box-sizing: border-box;
     font-family: 'Manrope', sans-serif;
 }

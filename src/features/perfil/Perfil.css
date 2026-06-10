@@ -1,21 +1,12 @@
 /* src/features/perfil/Perfil.css */
 
-.layout-app {
-  display: flex;
-  min-height: 100vh;
-  background: #F5F7F9;
-  font-family: 'Manrope', sans-serif;
-}
-
 .conteudo-perfil {
-  /* O pulo do gato: forçamos a largura a ser exatamente o 100% da tela menos a Sidebar */
-  margin-left: 256px;
-  width: calc(100% - 256px);
+  flex: 1;
   padding: 48px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Centraliza o wrapper se o monitor for muito largo */
+  align-items: center;
 }
 
 /* Wrapper limita a largura máxima ao tamanho cravado no Figma */

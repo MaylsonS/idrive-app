@@ -1,8 +1,6 @@
 /* ── Layout Principal ── */
 .gestao-main {
   flex: 1;
-  background: #F5F7F9;
-  min-height: 100vh;
   overflow-y: auto;
   font-family: 'Manrope', sans-serif;
 }

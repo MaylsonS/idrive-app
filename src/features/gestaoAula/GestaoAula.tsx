@@ -5,7 +5,6 @@ import { aulaService, type AulaResponseDTO } from '../../services/aulaService';
 import { useAuthContext } from '../../contexts/AuthContext';
 import './GestaoAula.css';
 
-// ── Helpers ─────────────────────────────────────────────────
 function formatarData(iso: string) {
   return new Date(iso).toLocaleDateString('pt-BR', {
     day: '2-digit', month: 'short', year: 'numeric',
@@ -20,7 +19,6 @@ function faixa(ini: string, fim: string) {
   return `${formatarHora(ini)} — ${formatarHora(fim)}`;
 }
 
-// ── Status badge ─────────────────────────────────────────────
 const STATUS_CONFIG = {
   ACEITA:    { label: 'Confirmada',  bg: '#D8E3FB', color: '#475266' },
   CONCLUIDA: { label: 'Concluída',   bg: '#DCFCE7', color: '#166534' },

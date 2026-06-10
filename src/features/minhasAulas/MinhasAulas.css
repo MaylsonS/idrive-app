@@ -2,10 +2,8 @@
 
 /* ═══════════════════════════ LAYOUT ═══════════════════════════ */
 .ma-main {
-    margin-left: 256px;
+    flex: 1;
     padding: 96px 24px 0 32px;
-    background: #F5F7F9;
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
     gap: 40px;

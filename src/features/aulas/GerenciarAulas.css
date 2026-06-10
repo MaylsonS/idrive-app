@@ -1,22 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap');
 
-.layout-app {
-    display: flex;
-    min-height: 100vh;
-    background: #F5F7F9;
-    font-family: 'Manrope', sans-serif;
+.header-gerenciar { 
+    margin-bottom: 28px;
+    padding: 34px 34px 0;
 }
-
-.conteudo-principal {
-    flex: 1;
-    margin-left: 256px;  /* igual à largura da sidebar */
-    padding: 34px;
-    box-sizing: border-box;
-    min-height: 100vh;
-}
-
-/* Header */
-.header-gerenciar { margin-bottom: 28px; }
 
 .titulo-gerenciar {
     font-weight: 700;
@@ -38,6 +25,7 @@
     display: flex;
     gap: 32px;
     align-items: flex-start;
+    padding: 0 34px 34px;
 }
 
 .coluna-esquerda {
